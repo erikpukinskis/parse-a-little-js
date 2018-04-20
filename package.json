@@ -6,6 +6,9 @@
   "dependencies": {
     "module-library": "*"
   },
+  "scripts": {
+    "test": "node test"
+  },
   "devDependencies": {
     "run-test": "*"
   },

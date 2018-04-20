@@ -95,6 +95,70 @@ module.exports = library.export(
       return segments
     }
 
+    function detectExpression(text, forRightHandSide) {
+
+      var emptyMatch = text.match(/^[\s\u200b]*"?[\s\u200b]*$/)
+
+      if (emptyMatch) {
+        return anExpression.emptyExpression()
+      }
+
+      var segments = this.parse(text)
+
+      var expression = {
+        remainder: segments.remainder
+      }
+
+      var outro = segments.outro && segments.outro.split("") || []
+
+      var isFunctionLiteral = segments.introType == "function"
+
+      var isFunctionCall = !isFunctionLiteral && segments.outro && !!segments.outro.match(/^\([^{]*$/)
+
+      var isVariableAssignment = !isFunctionCall && segments.introType == "var"
+
+      var isStringLiteral = !isVariableAssignment
+
+      if (isVariableAssignment && forRightHandSide) {
+        expression.kind = "string literal"
+        expression.string = segments.middle
+
+      } else if (isFunctionLiteral) {
+        expression.kind = "function literal"
+        expression.functionName = segments.identifierIsh
+
+        if (segments.argumentSignature) {
+          expression.argumentNames = segments.argumentSignature.split(/\s*,\s*/)
+        }
+
+      } else if (isFunctionCall) {
+        expression.kind = "function call"
+
+        if (segments.separator) {
+          expression.functionName = segments.notIdentifier
+          expression.leftHandSide = segments.identifierIsh
+
+        } else {
+          expression.functionName = segments.identifierIsh
+        }
+
+      } else if (isVariableAssignment) {
+        var remainder = [segments.notIdentifier, segments.outro].join("")
+        expression = this.detectExpression(remainder, true)
+        expression.leftHandSide = segments.identifierIsh
+        expression.isDeclaration = true
+
+      } else if (isStringLiteral) {
+        expression.kind = "string literal"
+        expression.string = segments.middle
+      }
+
+
+      return expression
+    }
+
+    parseALittle.detectExpression = detectExpression
+    
     return parseALittle
   }
 )
