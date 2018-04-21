@@ -133,3 +133,13 @@ runTest(
   }
 )
 
+runTest(
+  "detectExpression can detect an expression",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("function(){\n  }")
+    var literal = parseALittle.detectExpression(segments)
+    expect(literal.kind).to.equal("function literal")
+    done()
+  }
+)

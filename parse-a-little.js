@@ -95,10 +95,7 @@ module.exports = library.export(
       return segments
     }
 
-    function detectExpression(text, forRightHandSide) {
-
-
-      var segments = this.parse(text)
+    function detectExpression(segments) {
 
       var expression = {
         remainder: segments.remainder
