@@ -7,7 +7,7 @@ module.exports = library.export(
     var ZERO_WIDTH_SPACE = "\u200b"
 
     function parseALittle(source) {
-      var introMatch = source.match(/^(\s*"?function\s|\s*"?var\s|\s*\[|\s*")/) || source.match(/^"/)
+      var introMatch = source.match(/^(\s*"?function\b|\s*"?var\s|\s*\[|\s*")/) || source.match(/^"/)
       var outroMatch = source.match(/(\s*"?function\s|\s*"?var\s|\s*\[|\s*")?(.*?)([\[\]}{(),"\]]*)$/)
       var intro = introMatch && introMatch[0].trim()
       var middle = outroMatch[2]
@@ -21,6 +21,8 @@ module.exports = library.export(
         var arrayMatch = intro == "["
 
         var functionLiteralMatch = !arrayMatch && intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)
+
+        debugger
 
         var identifierMatch = !functionLiteralMatch && middle.match(/^\s*([\.\w]+)\s*$/)
 
@@ -97,11 +99,6 @@ module.exports = library.export(
 
     function detectExpression(text, forRightHandSide) {
 
-      var emptyMatch = text.match(/^[\s\u200b]*"?[\s\u200b]*$/)
-
-      if (emptyMatch) {
-        return anExpression.emptyExpression()
-      }
 
       var segments = this.parse(text)
 

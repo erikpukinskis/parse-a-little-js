@@ -122,3 +122,14 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "no functions named function",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("function(){")
+    expect(segments.intro).to.equal("function")
+    done()
+  }
+)
+
