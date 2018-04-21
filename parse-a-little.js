@@ -22,8 +22,6 @@ module.exports = library.export(
 
         var functionLiteralMatch = !arrayMatch && intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)
 
-        debugger
-
         var identifierMatch = !functionLiteralMatch && middle.match(/^\s*([\.\w]+)\s*$/)
 
         var separatedMatch = !identifierMatch && middle.match(/^(.+)\s*\s([=:])\s\s*(.+)$/)
