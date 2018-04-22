@@ -143,6 +143,10 @@ module.exports = library.export(
       } else if (isStringLiteral) {
         expression.kind = "string literal"
         expression.string = segments.middle
+        if (outro[0] == "\"") {
+          outro = outro.slice(1)
+        }
+        expression.remainder = outro.join("")
       }
 
 

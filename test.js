@@ -1,5 +1,6 @@
 var runTest = require("run-test")(require)
 
+
 runTest(
   "quotes parse",
   ["./"],
@@ -143,3 +144,17 @@ runTest(
     done()
   }
 )
+
+
+runTest(
+  "detectExpression tells you what's remaining to parse",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("hi}))}")
+    debugger
+    var literal = parseALittle.detectExpression(segments)
+    expect(literal.remainder).to.equal("}))}")
+    done()
+  }
+)
+
