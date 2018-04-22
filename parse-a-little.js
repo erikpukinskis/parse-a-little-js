@@ -109,10 +109,10 @@ module.exports = library.export(
 
       var isVariableAssignment = !isFunctionCall && segments.introType == "var"
 
-      var isStringLiteral = !isVariableAssignment
+      var isLeafExpression = !isVariableAssignment
 
       if (isVariableAssignment && forRightHandSide) {
-        expression.kind = "string literal"
+        expression.kind = "leaf expression"
         expression.string = segments.middle
 
       } else if (isFunctionLiteral) {
@@ -140,8 +140,8 @@ module.exports = library.export(
         expression.leftHandSide = segments.identifierIsh
         expression.isDeclaration = true
 
-      } else if (isStringLiteral) {
-        expression.kind = "string literal"
+      } else if (isLeafExpression) {
+        expression.kind = "leaf expression"
         expression.string = segments.middle
         if (outro[0] == "\"") {
           outro = outro.slice(1)

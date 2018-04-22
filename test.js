@@ -1,6 +1,12 @@
 var runTest = require("run-test")(require)
 
 
+
+
+
+// parseALittleJs
+
+
 runTest(
   "quotes parse",
   ["./"],
@@ -130,6 +136,29 @@ runTest(
   function(expect, done, parseALittle) {
     var segments = parseALittle("function(){")
     expect(segments.intro).to.equal("function")
+    done()
+  }
+)
+
+
+
+
+
+
+
+// detectExpression
+
+
+runTest(
+  "detect identifiers",
+  ["./"],
+  function(expect, done, parseALittleJs) {
+    var segments = parseALittleJs("bar")
+    var expression = parseALittleJs.detectExpression(segments)
+
+    expect(expression.kind).to.equal("leaf expression")
+    expect(expression.string).to.equal("bar")
+
     done()
   }
 )
