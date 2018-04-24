@@ -173,6 +173,22 @@ runTest(
     expect(expression.kind).to.equal("leaf expression")
     expect(expression.string).to.equal("bar")
     expect(expression.leftHandSide).to.equal("foo")
+    expect(expression.isDeclaration).not.to.be.true
+
+    done()
+  }
+)
+
+
+runTest(
+  "tell the difference between simple assignment and a variable declaration",
+  ["./"],
+  function(expect, done, parseALittleJs) {
+
+    var segments = parseALittleJs("var foo = bar")
+    var expression = parseALittleJs.detectExpression(segments)
+
+    expect(expression.isDeclaration).to.be.true
 
     done()
   }
@@ -196,7 +212,6 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("hi}))}")
-    debugger
     var literal = parseALittle.detectExpression(segments)
     expect(literal.remainder).to.equal("}))}")
     done()

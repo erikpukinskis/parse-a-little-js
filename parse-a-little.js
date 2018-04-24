@@ -133,9 +133,7 @@ module.exports = library.export(
         if (segments.separator == "=") {
           expression.leftHandSide = segments.identifierIsh
           expression.string = segments.notIdentifier
-          if (segments.intro == "var") {
-            expression.isDeclaration = true
-          }
+          expression.isDeclaration = segments.intro == "var"
         } else {
           expression.string = segments.middle
         }
