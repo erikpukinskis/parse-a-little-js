@@ -107,15 +107,9 @@ module.exports = library.export(
 
       var isFunctionCall = !isFunctionLiteral && segments.outro && !!segments.outro.match(/^\([^{]*$/)
 
-      var isVariableAssignment = !isFunctionCall && segments.introType == "var"
+      var isLeafExpression = !isFunctionCall
 
-      var isLeafExpression = !isVariableAssignment
-
-      if (isVariableAssignment && forRightHandSide) {
-        expression.kind = "leaf expression"
-        expression.string = segments.middle
-
-      } else if (isFunctionLiteral) {
+      if (isFunctionLiteral) {
         expression.kind = "function literal"
         expression.functionName = segments.identifierIsh
 
@@ -134,15 +128,18 @@ module.exports = library.export(
           expression.functionName = segments.identifierIsh
         }
 
-      } else if (isVariableAssignment) {
-        var remainder = [segments.notIdentifier, segments.outro].join("")
-        expression = this.detectExpression(remainder, true)
-        expression.leftHandSide = segments.identifierIsh
-        expression.isDeclaration = true
-
       } else if (isLeafExpression) {
         expression.kind = "leaf expression"
-        expression.string = segments.middle
+        if (segments.separator == "=") {
+          expression.leftHandSide = segments.identifierIsh
+          expression.string = segments.notIdentifier
+          if (segments.intro == "var") {
+            expression.isDeclaration = true
+          }
+        } else {
+          expression.string = segments.middle
+        }
+
         if (outro[0] == "\"") {
           outro = outro.slice(1)
         }

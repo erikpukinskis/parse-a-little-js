@@ -3,7 +3,6 @@ var runTest = require("run-test")(require)
 
 
 
-
 // parseALittleJs
 
 
@@ -162,6 +161,23 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "detect simple assignment",
+  ["./"],
+  function(expect, done, parseALittleJs) {
+
+    var segments = parseALittleJs("foo = bar")
+    var expression = parseALittleJs.detectExpression(segments)
+
+    expect(expression.kind).to.equal("leaf expression")
+    expect(expression.string).to.equal("bar")
+    expect(expression.leftHandSide).to.equal("foo")
+
+    done()
+  }
+)
+
 
 runTest(
   "detectExpression can detect an expression",
