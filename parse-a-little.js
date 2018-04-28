@@ -17,6 +17,8 @@ module.exports = library.export(
         middle = middle.replace(ZERO_WIDTH_SPACE, "")
       }
 
+          debugger
+
       if (middle) {
         var arrayMatch = intro == "["
 
@@ -40,7 +42,10 @@ module.exports = library.export(
 
         } else if (identifierMatch) {
           var identifierIsh = identifierMatch[1]
-
+          if (outro[0] == "(" && outro.length > 1) {
+            var remainder = outro.slice(1)
+            outro = "("
+          }
         } else if (separatedMatch) {
           var identifierIsh = separatedMatch[1]
           var separator = separatedMatch[2]

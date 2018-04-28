@@ -218,3 +218,14 @@ runTest(
   }
 )
 
+
+runTest(
+  "detects call remainders even if there's no arguments",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("a.b()")
+    var literal = parseALittle.detectExpression(segments)
+    expect(literal.remainder).to.equal(")")
+    done()
+  }
+)
