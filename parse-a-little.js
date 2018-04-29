@@ -17,8 +17,6 @@ module.exports = library.export(
         middle = middle.replace(ZERO_WIDTH_SPACE, "")
       }
 
-          debugger
-
       if (middle) {
         var functionLiteralMatch
         var identifierMatch
