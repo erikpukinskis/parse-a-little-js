@@ -20,27 +20,24 @@ module.exports = library.export(
           debugger
 
       if (middle) {
-        var arrayMatch = intro == "["
+        var functionLiteralMatch
+        var identifierMatch
+        var separatedMatch
+        var callMatch
+        var stringCloseMatch
 
-        var functionLiteralMatch = !arrayMatch && intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)
+        if (intro == "[") {
 
-        var identifierMatch = !functionLiteralMatch && middle.match(/^\s*([\.\w]+)\s*$/)
-
-        var separatedMatch = !identifierMatch && middle.match(/^(.+)\s*\s([=:])\s\s*(.+)$/)
-
-        var callMatch = !separatedMatch && middle.match(/^(\w+)[(](.*)$/)
-
-        var stringCloseMatch = !callMatch && intro == "\"" && middle.match(/^(.*)"(.*)$/)
-
-        if (arrayMatch) {
           var remainder = [middle, outro].join("")
           outro = undefined
 
-        } else if (functionLiteralMatch) {
+        } else if (functionLiteralMatch = intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)) {
+
           var identifierIsh = functionLiteralMatch[1]
           var argumentSignature = functionLiteralMatch[2]
 
-        } else if (identifierMatch) {
+        } else if (identifierMatch = middle.match(/^\s*([\.\w]+)\s*$/)) {
+
           var identifierIsh = identifierMatch[1]
           if (outro[0] == "(" && outro.length > 1) {
             var remainder = outro.slice(1)
@@ -49,18 +46,22 @@ module.exports = library.export(
             var remainder = outro
             outro = null
           }
-        } else if (separatedMatch) {
+
+        } else if (separatedMatch = middle.match(/^(.+)\s*\s([=:])\s\s*(.+)$/)) {
+
           var identifierIsh = separatedMatch[1]
           var separator = separatedMatch[2]
           var notIdentifier = separatedMatch[3]
           outro = undefined
 
-        } else if (callMatch) {
+        } else if (callMatch = middle.match(/^(\w+)[(](.*)$/)) {
+
           var identifierIsh = callMatch[1]
           var remainder = [callMatch[2], outro].join("")
           outro = "("
 
-        } else if (stringCloseMatch) {
+        } else if (stringCloseMatch = intro == "\"" && middle.match(/^(.*)"(.*)$/)) {
+
           var middle = stringCloseMatch[1]
           var remainder = [stringCloseMatch[2], outro].join("")
           outro = "\""
@@ -93,7 +94,6 @@ module.exports = library.export(
         remainder: remainder,
       }
 
-
       var expectIdentifier = introType == "var"
 
       if (expectIdentifier && segments.notIdentifier && !separator) {
@@ -111,11 +111,15 @@ module.exports = library.export(
 
       var outro = segments.outro && segments.outro.split("") || []
 
-      var isFunctionLiteral = segments.introType == "function"
-
-      var isFunctionCall = !isFunctionLiteral && segments.outro && !!segments.outro.match(/^\([^{]*$/)
-
-      var isLeafExpression = !isFunctionCall
+      if (segments.introType == "function") {
+        var isFunctionLiteral = true
+      } else if (segments.outro && !!segments.outro.match(/^\([^{]*$/)) {
+        var isFunctionCall = true
+      } else if (segments.identifierIsh || segments.notIdentifier) {
+        var isLeafExpression = true
+      } else {
+        return
+      }
 
       if (isFunctionLiteral) {
         expression.kind = "function literal"
@@ -149,6 +153,7 @@ module.exports = library.export(
         if (outro[0] == "\"") {
           outro = outro.slice(1)
         }
+
         expression.remainder = outro.join("")+(segments.remainder||"")
       }
 
@@ -156,7 +161,22 @@ module.exports = library.export(
       return expression
     }
 
+    function detectCloser(segments) {
+      if (segments.middle || segments.intro || !segments.outro) {
+        return
+      }
+      var closer = segments.outro[0]
+      return {
+        "}": "function literal",
+        ")": "function call",
+        ",": "argument",
+        "]": "array literal",
+      }[closer]
+    }
+
     parseALittle.detectExpression = detectExpression
+
+    parseALittle.detectCloser = detectCloser
     
     return parseALittle
   }

@@ -3,6 +3,7 @@ var runTest = require("run-test")(require)
 
 
 
+
 // parseALittleJs
 
 
@@ -229,3 +230,57 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "when detectExpression fails, we can get a closer",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var source = "doSomething(withThis)"
+    var segments = parseALittle(source)
+
+    var call = parseALittle.detectExpression(segments)
+
+    expect(call.remainder).to.equal("withThis)")
+
+    var reference = parseALittle.detectExpression(parseALittle(call.remainder))
+
+    expect(reference.remainder).to.equal(")")
+
+    var closer = parseALittle(reference.remainder)
+
+    expect(parseALittle.detectExpression(closer)).to.be.undefined
+
+    expect(parseALittle.detectCloser(closer)).to.equal("function call")
+
+    done()
+  }
+)
+
+runTest(
+  "detect function literal closers",
+  ["./"],
+  function(expect, done, parseALittle) {
+    expect(parseALittle.detectCloser({outro: "}"})).to.equal("function literal")
+    done()
+  }
+)
+
+runTest(
+  "detect array literal closers",
+  ["./"],
+  function(expect, done, parseALittle) {
+    expect(parseALittle.detectCloser({ outro: "]"})).to.equal("array literal")
+    done()
+  }
+)
+
+
+runTest(
+  "detect argument closers",
+  ["./"],
+  function(expect, done, parseALittle) {
+    expect(parseALittle.detectCloser({outro: ","})).to.equal("argument")
+    done()
+  }
+)
+
