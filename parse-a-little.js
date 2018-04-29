@@ -45,6 +45,9 @@ module.exports = library.export(
           if (outro[0] == "(" && outro.length > 1) {
             var remainder = outro.slice(1)
             outro = "("
+          } else {
+            var remainder = outro
+            outro = null
           }
         } else if (separatedMatch) {
           var identifierIsh = separatedMatch[1]
@@ -146,7 +149,7 @@ module.exports = library.export(
         if (outro[0] == "\"") {
           outro = outro.slice(1)
         }
-        expression.remainder = outro.join("")
+        expression.remainder = outro.join("")+(segments.remainder||"")
       }
 
 
