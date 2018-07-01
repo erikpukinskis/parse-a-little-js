@@ -7,6 +7,16 @@ module.exports = library.export(
     var ZERO_WIDTH_SPACE = "\u200b"
 
     function parseALittle(source) {
+
+      var emptyMatch = source.match(/^[\s\u200b]*"?[\s\u200b]*$/)
+
+      if (emptyMatch) {
+        return {
+          source: source,
+          hasNone: true
+        }
+      }
+
       var introMatch = source.match(/^(\s*"?function\b|\s*"?var\s|\s*\[|\s*")/) || source.match(/^"/)
       var outroMatch = source.match(/(\s*"?function\s|\s*"?var\s|\s*\[|\s*")?(.*?)([\[\]}{(),"\]]*)$/)
       var intro = introMatch && introMatch[0].trim()
@@ -81,6 +91,7 @@ module.exports = library.export(
 
       var segments = {
         source: source,
+        hasNone: false,
         intro: intro,
         introType: introType,
         outro: outro,
