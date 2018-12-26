@@ -18,7 +18,7 @@ module.exports = library.export(
       }
 
       var introMatch = source.match(/^(\s*"?function\b|\s*"?var\s|\s*\[|\s*")/) || source.match(/^"/)
-      var outroMatch = source.match(/(\s*"?function\s?|\s*"?var\s|\s*\[|\s*")?(.*?)([\[\]}{(),"\]]*)$/)
+      var outroMatch = source.match(/(\s*"?function\s|\s*"?var\s|\s*\[|\s*")?(.*?)([\[\]}{(),"\]]*)$/)
       var intro = introMatch && introMatch[0].trim()
       var middle = outroMatch[2]
       var outro = outroMatch[3]
