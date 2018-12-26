@@ -136,6 +136,7 @@ runTest(
   function(expect, done, parseALittle) {
     var segments = parseALittle("function(){")
     expect(segments.intro).to.equal("function")
+    expect(segments.identifierIsh).to.be.undefined
     done()
   }
 )
