@@ -110,11 +110,18 @@ runTest(
 )
 
 runTest(
-  "function argument signatures parse",
+  "function literal opening",
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("function foo(bar, baz){")
     expect(segments.argumentSignature).to.equal("bar, baz")
+    done.ish("argument signature parses out")
+    expect(segments.separator).to.equal("(")
+    done.ish(") is treated as the separator")
+    expect(segments.outro).to.equal("){")
+    done.ish("argument closer and body opener are in the outro")
+    expect(segments.remainder).to.be.undefined
+    done.ish("no remainder on a basic function literal open")
     done()
   }
 )

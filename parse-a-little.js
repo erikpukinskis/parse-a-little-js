@@ -43,6 +43,7 @@ module.exports = library.export(
 
           var identifierIsh = functionLiteralMatch[1]
           var argumentSignature = functionLiteralMatch[2]
+          var separator = "("
 
         } else if (identifierMatch = middle.match(/^\s*([\.\w]+)\s*$/)) {
 

@@ -10,7 +10,7 @@
     "test": "node test"
   },
   "devDependencies": {
-    "run-test": "*"
+    "run-test": "^0.52.0"
   },
   "repository": {
     "type": "git",
