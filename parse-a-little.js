@@ -6,7 +6,145 @@ module.exports = library.export(
 
     var ZERO_WIDTH_SPACE = "\u200b"
 
-    function parseALittle(source) {
+
+    // There are two major functions in here:
+
+    // parseALittle(source) -> segments, which is looking for something of the form: [ intro symboles, possible string or identifier, posisble separator, string, identifier, or argument list, outro symbols, remainder]
+
+    // detectExpression(segments) -> expression, which is identifying the core next available expression, figuring out which outro symbols are part of that, pulling out any identifiers, and decorating the expression with key string, remainder, etc
+
+    var parseALittle = parseWithoutRegexes
+
+    function isWhitespace(character) {
+      return !!character.match(/\s/)
+    }
+
+    var CONTAINER_BREAKS = "][}{".split("")
+
+    function breaksContainer(character) {
+      return contains(CONTAINER_BREAKS, character)
+    }
+
+    function isIdentifierSafe(character) {
+      return !!character.match(/\w/)
+    }
+
+    var OUTROS = ["\"", "]", "[", "}", "{", "(", "}", ","]
+
+    function isOutroSafe(character) {
+      return contains(OUTROS, character)
+    }
+
+    var TEXT_INTROS = ["var ", "function(", "function "]
+    var QUOTE = "\""
+
+    function grabIntros(string, startingAt) {
+      var hasQuote = string[startingAt] == "\""
+      var intros
+
+      if (hasQuote) {
+        intros = [QUOTE]
+      }
+
+      TEXT_INTROS.find(function(intro) {
+        if (hasQuote) {
+          var startIntroAt = startingAt + 1
+        } else {
+          var startIntroAt = startingAt
+        }
+
+        var doesMatch = string.slice(startIntroAt, intro.length) == intro        
+
+        if (doesMatch) {
+          var textIntro = intro.slice(intro.length - 1)
+
+          if (typeof intros == "undefined") {
+            intros = []
+          }
+          intros.push(textIntro)
+
+          return true
+        }
+      })
+
+      return intros
+    }
+
+    function parseWithoutRegexes(source) {
+      var didStart = false
+      var identifierIsh
+      var intros
+      var outros
+
+      for(var i=0; i<source.length; i++) {
+        var character = source[i]
+
+        if (isWhitespace(character)) {
+          continue
+        }
+
+        if (!intros && !identifierIsh &&breaksContainer(character)) {
+          return {
+            outro: character,
+            remainder: source.slice(1)
+          }
+        }
+
+        if (!intros && !identifierIsh && !outros) {
+          intros = grabIntros(source, i)
+
+          if (intros) {
+            var introsLength = intros.join("").length
+            i += introsLength - 1
+            // If we got a text intro, we need to skip ahead a bit. But i will be incremented in the for loop, so we want to stop just short of that
+            continue
+          }
+        }
+
+        if (isIdentifierSafe(character)) {
+          if (typeof identifierIsh == "undefined") {
+            identifierIsh = ""
+          }
+          identifierIsh += character
+          continue 
+        }
+
+        if (isOutroSafe(character)) {
+
+          if (typeof outros == "undefined") {
+            outros = []
+          }
+          outros.push(character)
+          continue
+        }
+
+        debugger
+      }
+
+      var segments = {
+        secondHalf: identifierIsh,
+        intros: intros,
+        outros: outros
+      }
+
+      return segments
+    }
+
+    function contains(array, value) {
+      if (!Array.isArray(array)) {
+        throw new Error("looking for "+JSON.stringify(value)+" in "+JSON.stringify(array)+", which is supposed to be an array. But it's not.")
+      }
+      var index = -1;
+      var length = array.length;
+      while (++index < length) {
+        if (array[index] == value) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function parseALittleOld(source) {
 
       var emptyMatch = source.match(/^[\s\u200b]*"?[\s\u200b]*$/)
 
@@ -14,6 +152,15 @@ module.exports = library.export(
         return {
           source: source,
           hasNone: true
+        }
+      }
+
+      if (containerSymbolsInIntro = source.match(/^\s*"?([\]\[\}\{\)]+)/)) {
+
+        var symbols = containerSymbolsInIntro[1]
+        return {
+          outro: symbols.slice(0,1),
+          remainder: source.slice(1)
         }
       }
 
@@ -27,6 +174,8 @@ module.exports = library.export(
         middle = middle.replace(ZERO_WIDTH_SPACE, "")
       }
 
+      debugger
+
       if (middle) {
         var functionLiteralMatch
         var identifierMatch
@@ -34,12 +183,7 @@ module.exports = library.export(
         var callMatch
         var stringCloseMatch
 
-        if (intro == "[") {
-
-          var remainder = [middle, outro].join("")
-          outro = undefined
-
-        } else if (functionLiteralMatch = intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)) {
+        if (functionLiteralMatch = intro == "function" && middle.match(/^\s*(\w*)\s*\(\s*((\w*)\s*(,\s*\w+\s*)*)/)) {
 
           var identifierIsh = functionLiteralMatch[1]
           var argumentSignature = functionLiteralMatch[2]

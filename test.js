@@ -1,10 +1,43 @@
 var runTest = require("run-test")(require)
 
+runTest.only(
+  "array opener in the remainder")
 
 
+runTest(
+  "opening an array",
+  ["./"],
+  function(expect, done, parseALittle) {
 
+    var segments = parseALittle("[books are fun]")
 
-// parseALittleJs
+    expect(segments.outro).to.equal("[")
+    expect(segments.remainder).to.equal("books are fun]")
+
+    done()
+  })
+
+runTest(
+  "leading whitespace",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("  hi")
+    expect(segments.identifierIsh).to.equal("hi")
+    done()
+  }
+)
+
+runTest(
+  "array opener in the remainder",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("\"laugh\",[")
+    expect(segments.outros).to.deep.equal(["\"", ",", "["])
+    expect(segments.secondHalf).to.equal("laugh")
+    expect(segments.remainder).to.be.undefined
+    done()
+  }
+)
 
 
 runTest(
@@ -53,17 +86,17 @@ runTest(
   }
 )
 
-runTest(
-  "can parse a string with remainder",
-  ["./"],
-  function(expect, done, parseALittle) {
-    var segments = parseALittle("\"hello\")(world)")
-    expect(segments.middle).to.equal("hello")
-    expect(segments.outro).to.equal("\"")
-    expect(segments.remainder).to.equal(")(world)")
-    done()
-  }
-)
+// runTest(
+//   "can parse a string with remainder",
+//   ["./"],
+//   function(expect, done, parseALittle) {
+//     var segments = parseALittle("\"hello\")(world)")
+//     expect(segments.middle).to.equal("hello")
+//     expect(segments.outro).to.equal("\"")
+//     expect(segments.remainder).to.equal(")(world)")
+//     done()
+//   }
+// )
 
 runTest(
   "function literal symbol parses",
@@ -126,16 +159,16 @@ runTest(
   }
 )
 
-runTest(
-  "array parses",
-  ["./"],
-  function(expect, done, parseALittle) {
-    var segments = parseALittle("[\"web-element\", \"browser-bridge\"],")
-    expect(segments.intro).to.equal("[")
-    expect(segments.remainder).to.equal("\"web-element\", \"browser-bridge\"],")
-    done()
-  }
-)
+// runTest(
+//   "array parses",
+//   ["./"],
+//   function(expect, done, parseALittle) {
+//     var segments = parseALittle("[\"web-element\", \"browser-bridge\"],")
+//     expect(segments.intro).to.equal("[")
+//     expect(segments.remainder).to.equal("\"web-element\", \"browser-bridge\"],")
+//     done()
+//   }
+// )
 
 runTest(
   "no functions named function",
@@ -228,16 +261,16 @@ runTest(
 )
 
 
-runTest(
-  "detects call remainders even if there's no arguments",
-  ["./"],
-  function(expect, done, parseALittle) {
-    var segments = parseALittle("a.b()")
-    var literal = parseALittle.detectExpression(segments)
-    expect(literal.remainder).to.equal(")")
-    done()
-  }
-)
+// runTest(
+//   "detects call remainders even if there's no arguments",
+//   ["./"],
+//   function(expect, done, parseALittle) {
+//     var segments = parseALittle("a.b()")
+//     var literal = parseALittle.detectExpression(segments)
+//     expect(literal.remainder).to.equal(")")
+//     done()
+//   }
+// )
 
 runTest(
   "when detectExpression fails, we can get a closer",
