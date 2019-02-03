@@ -51,7 +51,7 @@ module.exports = library.export(
           if (outro[0] == "(" && outro.length > 1) {
             var remainder = outro.slice(1)
             outro = "("
-          } else {
+          } else if (outro[0] != "(") {
             var remainder = outro
             outro = null
           }

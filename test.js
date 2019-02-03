@@ -90,11 +90,11 @@ runTest(
   "method parses",
   ["./"],
   function(expect, done, parseALittle) {
-    parseALittle("\"b(\"})")
-    parseALittle("hi)})")
-
     var segments = parseALittle("do.dee.dum(")
     expect(segments.identifierIsh).to.equal("do.dee.dum")
+    expect(segments.remainder).to.be.undefined
+    expect(segments.outro).to.equal("(")
+
     done()
   }
 )
