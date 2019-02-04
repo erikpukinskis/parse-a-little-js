@@ -53,7 +53,7 @@ module.exports = library.export(
           var startIntroAt = startingAt
         }
 
-        var doesMatch = string.slice(startIntroAt, intro.length) == intro        
+        var doesMatch = string.slice(startIntroAt, startIntroAt + intro.length) == intro        
 
         if (doesMatch) {
           var textIntro = intro.slice(0, intro.length - 1)
@@ -147,7 +147,6 @@ module.exports = library.export(
 
         if (!intros && !identifierIsh && !outros) {
           intros = grabIntros(source, i)
-
           if (intros) {
             var introsLength = intros.join("").length
             i += introsLength - 1
@@ -168,7 +167,6 @@ module.exports = library.export(
         // if we've already seen some outros and we see anything other than outros or whitespace, we're in the remainder
 
         if (outros) {
-          debugger
           var remainder = character
           continue
         }

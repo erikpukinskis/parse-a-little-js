@@ -2,6 +2,7 @@ var runTest = require("run-test")(require)
 
 
 
+
 runTest(
   "opening an array",
   ["./"],
@@ -109,7 +110,7 @@ runTest(
     parseALittle("f)")
 
     var segments = parseALittle("\"function \")")
-    expect(segments.intro).to.equal("\"function")
+    expect(segments.intros).to.deep.equal(["\"", "function"])
 
     parseALittle("function s(){")
     parseALittle("b})")
