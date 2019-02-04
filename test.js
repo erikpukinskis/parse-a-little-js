@@ -3,6 +3,7 @@ var runTest = require("run-test")(require)
 
 
 
+
 runTest(
   "opening an array",
   ["./"],
@@ -120,13 +121,14 @@ runTest(
 )
 
 runTest(
-  "method parses",
+  "method call parses",
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("do.dee.dum(")
-    expect(segments.identifierIsh).to.equal("do.dee.dum")
+    expect(segments.secondHalf).to.equal("do.dee.dum")
+    done.ish("can match dots in identifiers")
     expect(segments.remainder).to.be.undefined
-    expect(segments.outro).to.equal("(")
+    expect(segments.outros).to.deep.equal(["("])
 
     done()
   }

@@ -26,7 +26,7 @@ module.exports = library.export(
     }
 
     function isIdentifierSafe(character) {
-      return !!character.match(/\w/)
+      return !!character.match(/[\w\.]/)
     }
 
     var OUTROS = ["\"", "]", "[", "}", "{", "(", "}", ","]
@@ -132,6 +132,9 @@ module.exports = library.export(
         if (isWhitespace(character)) {
           continue
         }
+
+        // console.log("LOOKING AT "+character+" IN "+source)
+        // debugger
 
         if (remainder) {
           remainder += character
