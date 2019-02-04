@@ -55,7 +55,6 @@ module.exports = library.export(
 
         var doesMatch = string.slice(startIntroAt, intro.length) == intro        
 
-        debugger
         if (doesMatch) {
           var textIntro = intro.slice(0, intro.length - 1)
 
@@ -71,11 +70,60 @@ module.exports = library.export(
       return intros
     }
 
+    var EQUALS = "="
+    var COLON = ":"
+
+    function isSeparator(character, previousSeparators) {
+
+      if (isWhitespace(character)) {
+        return null
+      }
+
+      var i = 0
+
+      var closingQuote = previousSeparators && previousSeparators[i] == QUOTE
+
+      if (closingQuote) {
+        i++
+      }
+
+      if (previousSeparators && (previousSeparators[i] == EQUALS || previousSeparators[i] == COLON)) {
+        var separator = previousSeparators[i]
+        i++
+      }
+
+      if (previousSeparators && previousSeparators[i] == QUOTE) {
+        var openingQuote = QUOTE
+      }
+
+      if (!closingQuote && !separator && character == QUOTE) {
+        return QUOTE
+      }
+
+      if (!separator && character == COLON) {
+        return COLON
+      }
+
+      if (!separator && !closingQuote && character == EQUALS) {
+        return EQUALS
+      }
+
+      if (separator && !openingQuote &&character == QUOTE) {
+        return QUOTE
+      }
+
+      return false
+    }
+
     function parseWithoutRegexes(source) {
       var didStart = false
       var identifierIsh
       var intros
       var outros
+      var firstHalf
+      var secondHalf
+      var separators
+      var finishedSeparators = false
 
       for(var i=0; i<source.length; i++) {
         var character = source[i]
@@ -102,7 +150,19 @@ module.exports = library.export(
           }
         }
 
-        if (isIdentifierSafe(character)) {
+        if (isIdentifierSafe(character) && separators) {
+          if (!firstHalf) {
+            firstHalf = identifierIsh
+          }
+          if (!secondHalf) {
+            secondHalf = ""
+          }
+          secondHalf += character
+          continue
+
+        }
+
+        if (isIdentifierSafe(character) && !separators) {
           if (typeof identifierIsh == "undefined") {
             identifierIsh = ""
           }
@@ -119,13 +179,40 @@ module.exports = library.export(
           continue
         }
 
-        debugger
-      }
+        if (!finishedSeparators) {
+          var grabbedSeparator = isSeparator(character, separators)
+
+          if (separators && grabbedSeparator == null) {
+            continue
+          }
+
+          if (grabbedSeparator) {
+            if (!separators) {
+              separators = []
+            }
+            separators.push(grabbedSeparator)
+            continue
+          }
+
+          if (grabbedSeparator == false) {
+            if (separators && !finishedSeparators)  {
+              finishedSeparators = true
+            }
+          }
+        }
+
+      } // done with character loop
 
       var segments = {
-        secondHalf: identifierIsh,
         intros: intros,
-        outros: outros
+        outros: outros,
+        separators: separators,
+        firstHalf: firstHalf,
+        secondHalf: secondHalf,
+      }
+
+      if (!separators) {
+        segments.secondHalf = identifierIsh
       }
 
       return segments

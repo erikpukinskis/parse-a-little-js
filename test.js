@@ -1,6 +1,7 @@
 var runTest = require("run-test")(require)
 
 
+
 runTest(
   "opening an array",
   ["./"],
@@ -66,7 +67,7 @@ runTest(
     expect(segments.intros).to.deep.equal(["var"])
     done.ish("parses out var intro")
     expect(segments.firstHalf).to.equal("foo")
-    expect(segments.separator).to.equal("=")
+    expect(segments.separators).to.deep.equal(["="])
     expect(segments.secondHalf).to.equal("bar")
     done()
   }
