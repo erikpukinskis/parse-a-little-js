@@ -35,7 +35,11 @@ module.exports = library.export(
       return contains(OUTROS, character)
     }
 
-    var TEXT_INTROS = ["var ", "function(", "function "]
+    var TEXT_INTROS = [
+      /^var\s/,
+      /^function\(/,
+      /^function\s/]
+
     var QUOTE = "\""
 
     function grabIntros(string, startingAt) {
@@ -46,21 +50,25 @@ module.exports = library.export(
         intros = [QUOTE]
       }
 
-      TEXT_INTROS.find(function(intro) {
+      TEXT_INTROS.find(function(textIntroPattern) {
         if (hasQuote) {
           var startIntroAt = startingAt + 1
         } else {
           var startIntroAt = startingAt
         }
 
-        var doesMatch = string.slice(startIntroAt, startIntroAt + intro.length) == intro        
+        var possibleTextIntro = string.slice(startIntroAt)
 
-        if (doesMatch) {
-          var textIntro = intro.slice(0, intro.length - 1)
+        var textIntroMatch = possibleTextIntro.match(textIntroPattern)
+
+        if (textIntroMatch) {
+          var textIntro = textIntroMatch[0]
+          textIntro = textIntroMatch[0].slice(0, textIntroMatch[0].length - 1)
 
           if (typeof intros == "undefined") {
             intros = []
           }
+
           intros.push(textIntro)
 
           return true
