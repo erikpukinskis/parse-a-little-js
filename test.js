@@ -78,8 +78,8 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("zoom(1)")
-    expect(segments.identifierIsh).to.equal("zoom")
-    expect(segments.outro).to.equal("(")
+    expect(segments.secondHalf).to.equal("zoom")
+    expect(segments.outros).to.deep.equal(["("])
     expect(segments.remainder).to.equal("1)")
     done()
   }

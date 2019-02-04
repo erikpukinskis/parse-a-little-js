@@ -124,11 +124,17 @@ module.exports = library.export(
       var secondHalf
       var separators
       var finishedSeparators = false
+      var remainder
 
       for(var i=0; i<source.length; i++) {
         var character = source[i]
 
         if (isWhitespace(character)) {
+          continue
+        }
+
+        if (remainder) {
+          remainder += character
           continue
         }
 
@@ -150,6 +156,23 @@ module.exports = library.export(
           }
         }
 
+        if (isOutroSafe(character)) {
+
+          if (typeof outros == "undefined") {
+            outros = []
+          }
+          outros.push(character)
+          continue
+        }
+
+        // if we've already seen some outros and we see anything other than outros or whitespace, we're in the remainder
+
+        if (outros) {
+          debugger
+          var remainder = character
+          continue
+        }
+
         if (isIdentifierSafe(character) && separators) {
           if (!firstHalf) {
             firstHalf = identifierIsh
@@ -159,7 +182,6 @@ module.exports = library.export(
           }
           secondHalf += character
           continue
-
         }
 
         if (isIdentifierSafe(character) && !separators) {
@@ -168,15 +190,6 @@ module.exports = library.export(
           }
           identifierIsh += character
           continue 
-        }
-
-        if (isOutroSafe(character)) {
-
-          if (typeof outros == "undefined") {
-            outros = []
-          }
-          outros.push(character)
-          continue
         }
 
         if (!finishedSeparators) {
@@ -204,11 +217,13 @@ module.exports = library.export(
       } // done with character loop
 
       var segments = {
+        source: source,
         intros: intros,
         outros: outros,
         separators: separators,
         firstHalf: firstHalf,
         secondHalf: secondHalf,
+        remainder: remainder,
       }
 
       if (!separators) {
