@@ -1,8 +1,5 @@
 var runTest = require("run-test")(require)
 
-runTest.only(
-  "array opener in the remainder")
-
 
 runTest(
   "opening an array",
@@ -22,7 +19,7 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("  hi")
-    expect(segments.identifierIsh).to.equal("hi")
+    expect(segments.secondHalf).to.equal("hi")
     done()
   }
 )
@@ -45,7 +42,7 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("\"browser-bridge\"")
-    expect(segments.outro).to.equal("\"")
+    expect(segments.outros).to.deep.equal(["\""])
     done()
   }
 )
@@ -56,7 +53,7 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("\"browser-bridge\"")
-    expect(segments.outro).to.equal("\"")
+    expect(segments.outros).to.deep.equal(["\""])
     done()
   }
 )
@@ -66,10 +63,11 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("var foo = bar\"")
-    expect(segments.intro).to.equal("var")
-    expect(segments.identifierIsh).to.equal("foo")
+    expect(segments.intros).to.deep.equal(["var"])
+    done.ish("parses out var intro")
+    expect(segments.firstHalf).to.equal("foo")
     expect(segments.separator).to.equal("=")
-    expect(segments.notIdentifier).to.equal("bar")
+    expect(segments.secondHalf).to.equal("bar")
     done()
   }
 )

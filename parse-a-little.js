@@ -55,8 +55,9 @@ module.exports = library.export(
 
         var doesMatch = string.slice(startIntroAt, intro.length) == intro        
 
+        debugger
         if (doesMatch) {
-          var textIntro = intro.slice(intro.length - 1)
+          var textIntro = intro.slice(0, intro.length - 1)
 
           if (typeof intros == "undefined") {
             intros = []
