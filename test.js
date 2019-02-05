@@ -116,7 +116,7 @@ runTest(
     segments = parseALittle(",")
     var comma = parseALittle.detectExpression(segments)
     expect(comma.kind).to.equal("container break")
-    expect(comma.kindToClose).to.equal("array item")
+    expect(comma.kindToClose).to.equal("array item or key value")
     done.ish("detect comma container break")
 
     done()

@@ -81,7 +81,7 @@ module.exports = library.export(
         } else if (symbol == "}") {
           expression.kindToOpen = "object or function literal"
         } else if (symbol == ",") {
-          expression.kindToClose = "array item"
+          expression.kindToClose = "array item or key value"
         }
 
         return expression
