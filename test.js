@@ -2,7 +2,6 @@ var runTest = require("run-test")(require)
 
 
 
-
 runTest(
   "opening an array",
   ["./"],
@@ -27,12 +26,16 @@ runTest(
 )
 
 runTest(
-  "array opener in the remainder",
+  "array opener at the end of line",
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("\"laugh\",[")
-    expect(segments.outros).to.deep.equal(["\"", ",", "["])
     expect(segments.secondHalf).to.equal("laugh")
+    done.ish("parse out string second half")
+    expect(segments.intros).to.deep.equal(["\""])
+    done.ish("parse out quote intro")
+    expect(segments.outros).to.deep.equal(["\"", ",", "["])
+    done.ish("array opener goes in outros")
     expect(segments.remainder).to.be.undefined
     done()
   }
@@ -64,8 +67,8 @@ runTest(
   "variable assignment parses",
   ["./"],
   function(expect, done, parseALittle) {
-    var segments = parseALittle("var foo = bar\"")
-    expect(segments.intros).to.deep.equal(["var"])
+    var segments = parseALittle("\"var foo = bar\"")
+    expect(segments.intros).to.deep.equal(["\"", "var"])
     done.ish("parses out var intro")
     expect(segments.firstHalf).to.equal("foo")
     expect(segments.separators).to.deep.equal(["="])

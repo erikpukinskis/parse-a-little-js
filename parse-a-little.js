@@ -13,7 +13,91 @@ module.exports = library.export(
 
     // detectExpression(segments) -> expression, which is identifying the core next available expression, figuring out which outro symbols are part of that, pulling out any identifiers, and decorating the expression with key string, remainder, etc
 
-    var parseALittle = parseWithoutRegexes
+    var parseALittle = parseAllAtOnce
+
+    function splitOutro(outro) {
+      return outro.replace(" ", "").split("")      
+    }
+    
+    function parseAllAtOnce(source) {
+      source = source.trim().replace(/\s+/g, " ")
+
+      console.log("matching "+source)
+      debugger
+      var containerBreakMatch = source.match(/^[\[\]\{\}]/)
+
+      if (containerBreakMatch) {
+        return {
+          outro: source[0],
+          remainder: source.slice(1)}}
+
+      var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) ?= ?(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
+
+      if (declarationAssignmentMatch) {
+        if (declarationAssignmentMatch[1]) {
+          var intros = [QUOTE]
+        }
+        intros.push(VAR)
+        debugger
+        var firstHalf = declarationAssignmentMatch[2]
+        var secondHalf = declarationAssignmentMatch[4]
+        var separators = [EQUALS]
+
+        if (declarationAssignmentMatch[3]) {
+          separators.push(QUOTE)
+        }
+
+        if (declarationAssignmentMatch[5]) {
+          var outros = splitOutro(declarationAssignmentMatch[5])
+        }
+
+        return {
+          intros: intros,
+          firstHalf: firstHalf,
+          separators: separators,
+          secondHalf: secondHalf,
+          outros: outros,
+        }
+      }
+
+      // maybe quote, maybe space, identifier, maybe space, outro symbols and spaces, everything else
+      var identifierMatch = source.match(/^(\"?)(\w+) ?([\"\,\(\)\[\]\{\} ]*)$/)
+
+      debugger
+      if (identifierMatch) {
+        if (identifierMatch[1]) {
+          var intros = ["\""]
+        }
+        if (identifierMatch[3]) {
+          var outros = splitOutro(identifierMatch[3])
+        }
+
+        return {
+          intros: intros,
+          secondHalf: identifierMatch[2],
+          outros: outros,
+        }
+      }
+
+      var stringMatch = source.match(/^(\"?) *([^"]+) *([\"\,\(\)\[\]\{\} ]*)$/)
+
+      if (stringMatch) {
+        if (stringMatch[1]) {
+          var intros = ["\""]
+        }
+        if (stringMatch[3]) {
+          var outros = stringMatch[3].replace(" ", "").split("")
+        }
+
+        return {
+          intros: intros,
+          secondHalf: stringMatch[2],
+          outros: outros,
+        }        
+      }
+
+      throw new Error("impl")
+    }
 
     function isWhitespace(character) {
       return !!character.match(/\s/)
@@ -41,6 +125,8 @@ module.exports = library.export(
       /^function\s/]
 
     var QUOTE = "\""
+    var VAR = "var"
+    var FUNCTION = "function"
 
     function grabIntros(string, startingAt) {
       var hasQuote = string[startingAt] == "\""
