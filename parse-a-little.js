@@ -204,7 +204,6 @@ module.exports = library.export(
       // This uses all possible outro symbols, because the values could be any kind of expression
       var keyValueMatch = source.match(/("?)(.*)([ "]*):([ "]*)(.*)$/)
 
-      debugger
       if (keyValueMatch) {
 
         var key = keyValueMatch[2]
@@ -220,8 +219,6 @@ module.exports = library.export(
         if (keyValueMatch[4].trim() == "\"") {
           separators.push("\"")
         }
-
-        debugger
 
         var segments = parseALittle(rightHandSide, {expressionsOnly: true})
 
@@ -273,8 +270,7 @@ module.exports = library.export(
         }        
       }
 
-      debugger
-      throw new Error("impl")
+      throw new Error("Invalid EZJS: "+source)
     }
 
     var QUOTE = "\""
