@@ -289,6 +289,37 @@ runTest(
 )
 
 
+runTest(
+  "detect a function call",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("boo.blob(\"bar\")")
+    debugger
+    var call = parseALittle.detectExpression(segments)
+    expect(call.kind).to.equal("function call")
+    done.ish("function call gets right kind")
+    expect(call.functionName).to.equal("boo.blob")
+    done.ish("detect function call name")
+    expect(call.remainder).to.equal("\"bar\")")
+    done.ish("detect function call remainder")
+
+    done()
+  }
+)
+
+runTest(
+  "pull first quote out of the remainder if we seem to be in a quoted call",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("\"boo.blob(\"baz,")
+    var call = parseALittle.detectExpression(segments)
+    expect(call.functionName).to.equal("boo.blob")
+    expect(call.remainder).to.equal("baz,")
+
+    done()
+  }
+)
+
 // runTest(
 //   "detects call remainders even if there's no arguments",
 //   ["./"],
