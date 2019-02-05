@@ -31,7 +31,7 @@ module.exports = library.export(
       source = source.trim().replace(/\s+/g, " ")
 
       console.log("matching "+source)
-      debugger
+
       var containerBreakMatch = source.match(/^[\[\]\{\}]/)
 
       if (containerBreakMatch) {
@@ -125,7 +125,8 @@ module.exports = library.export(
         }
       }
 
-      var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?(.*)(\"?)([\}\) ]*)$/)
+      var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?([^"})]*)(\"?)([\}\) ]*)$/)
+      debugger
 
       if (assignmentMatch) {
         if (assignmentMatch[1]) {
@@ -133,11 +134,11 @@ module.exports = library.export(
         }
         var firstHalf = assignmentMatch[2]
         var separators = [EQUALS]
-        var secondHalf = assignmentMatch[2]
-        if (assignmentMatch[4]) {
-          var outros = splitOutro(assignmentMatch[4])
+        var secondHalf = assignmentMatch[3]
+        if (assignmentMatch[5]) {
+          var outros = splitOutro(assignmentMatch[5])
         }
-        if (assignmentMatch[3]) {
+        if (assignmentMatch[4]) {
           if (!outros) {
             var outros = []
           }
@@ -177,8 +178,6 @@ module.exports = library.export(
 
         var functionName = functionCallMatch[2]
 
-        debugger
-
         return {
           intros: intros,
           secondHalf: functionName,
@@ -189,7 +188,6 @@ module.exports = library.export(
       // maybe quote, maybe space, identifier, maybe space, outro symbols and spaces, everything else
       var identifierMatch = source.match(/^(\"?)(\w+) ?([\"\,\(\)\[\]\{\} ]*)$/)
 
-      debugger
       if (identifierMatch) {
         if (identifierMatch[1]) {
           var intros = ["\""]

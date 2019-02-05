@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-// runTest.only("variable assignment parses")
+// runTest.only("detect simple assignment")
 
 runTest(
   "opening an array",
@@ -86,7 +86,7 @@ runTest(
     expect(segments.firstHalf).to.equal("foo")
     done.ish("parse out variable assignment name")
     expect(segments.separators).to.deep.equal(["="])
-    
+
     done()
   })
 
@@ -239,6 +239,7 @@ runTest(
   ["./"],
   function(expect, done, parseALittleJs) {
 
+    debugger
     var segments = parseALittleJs("foo = bar")
     var expression = parseALittleJs.detectExpression(segments)
 
