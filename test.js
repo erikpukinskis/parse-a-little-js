@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-// runTest.only("function literal symbol parses")
+runTest.only("function literal opening")
 
 runTest(
   "opening an array",
@@ -152,11 +152,11 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("function foo(bar, baz){")
-    expect(segments.argumentSignature).to.equal("bar, baz")
+    expect(segments.secondHalf).to.equal("bar, baz")
     done.ish("argument signature parses out")
-    expect(segments.separator).to.equal("(")
+    expect(segments.separators).to.deep.equal(["("])
     done.ish(") is treated as the separator")
-    expect(segments.outro).to.equal("){")
+    expect(segments.outros).to.deep.equal([")","{"])
     done.ish("argument closer and body opener are in the outro")
     expect(segments.remainder).to.be.undefined
     done.ish("no remainder on a basic function literal open")

@@ -31,24 +31,60 @@ module.exports = library.export(
           outro: source[0],
           remainder: source.slice(1)}}
 
-      var functionLiteralMatch = source.match(/^(\"?)function (\"?)([\,\)\[\]\{\} ]*)$/)
+      var functionLiteralMatch = source.match(/^(\"?)function (\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
 
       if (functionLiteralMatch) {
+
+        var openingQuote = functionLiteralMatch[1]
+        var identifierIsh = functionLiteralMatch[2]
+        var argumentSignature = functionLiteralMatch[3]
+        var trailingQuote = functionLiteralMatch[4]
+        var outroMatch = functionLiteralMatch[5]
+
         var intros = [FUNCTION]
-        if (functionLiteralMatch[1]) {
+
+        if (openingQuote) {
           intros.unshift(QUOTE)
         }
-        if (functionLiteralMatch[3]) {
-          var outros = splitOutro(functionLiteralMatch[3])
+
+        if (identifierIsh) {
+          var firstHalf = identifierIsh
         }
-        if (functionLiteralMatch[2]) {
+
+        if (argumentSignature) {
+          var separators = [OPEN_PAREN]
+
+          var argumentMatch = argumentSignature.match(/\(([^\)]*)(\)?)$/)
+          
+          debugger
+          if (argumentMatch[2]) {
+            var outros = [CLOSE_PAREN]
+          }
+
+          if (argumentMatch[1]) {
+            var secondHalf = argumentMatch[1]
+          }
+        }
+
+        if (trailingQuote) {
           if (!outros) {
             var outros = []
           }
           outros.unshift(QUOTE)
         }
+
+        if (outroMatch) {
+          if (!outros) {
+            var outros = []
+          }
+          outros = outros.concat(splitOutro(outroMatch))
+        }
+
         return {
           intros: intros,
+          firstHalf: firstHalf,
+          separators: separators,
+          secondHalf: secondHalf,
           outros: outros,
         }
       }
@@ -185,6 +221,7 @@ module.exports = library.export(
     var VAR = "var"
     var FUNCTION = "function"
     var OPEN_PAREN = "("
+    var CLOSE_PAREN = ")"
 
     function grabIntros(string, startingAt) {
       var hasQuote = string[startingAt] == "\""
