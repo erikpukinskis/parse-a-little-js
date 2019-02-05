@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-// runTest.only("detect simple assignment")
+// runTest.only("detect a function literal")
 
 runTest(
   "opening an array",
@@ -272,7 +272,7 @@ runTest(
   "detect a function literal",
   ["./"],
   function(expect, done, parseALittle) {
-    var segments = parseALittle("function(){\n  }")
+    var segments = parseALittle("function (){\n  }")
     var literal = parseALittle.detectExpression(segments)
     expect(literal.kind).to.equal("function literal")
     done()
