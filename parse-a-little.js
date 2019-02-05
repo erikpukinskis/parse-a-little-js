@@ -32,7 +32,7 @@ module.exports = library.export(
 
       // console.log("matching "+source)
 
-      var containerBreakMatch = source.match(/^[\[\]\{\}]/)
+      var containerBreakMatch = source.match(/^[\[\]\{\}\,]/)
 
       if (containerBreakMatch) {
         return {

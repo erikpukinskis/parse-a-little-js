@@ -4,8 +4,6 @@ var runTest = require("run-test")(require)
 
 // add a test for assigning a function call as a key value
 
-// runTest.only(
-//   "opening an array")
 
 runTest(
   "object literals",
@@ -48,6 +46,7 @@ runTest(
     done()
   })
 
+
 runTest(
   "opening an array",
   ["./"],
@@ -88,7 +87,40 @@ runTest(
   })
 
 
-// add a test function call that takes an array of items
+runTest(
+  "array in function call args",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("foo([1,")
+    expect(segments.outros).to.deep.equal(["("])
+    expect(segments.remainder).to.equal("[1,")
+    done.ish("can parse function call with array open")
+
+    var call = parseALittle.detectExpression(segments)
+
+    expect(call.remainder).to.equal("[1,")
+
+    segments = parseALittle("[1,")
+    expect(segments.remainder).to.equal("1,")
+    done.ish("can parse array open")
+
+    segments = parseALittle("1,")
+    expect(segments.secondHalf).to.equal("1")
+    expect(segments.outros).to.deep.equal([","])
+    done.ish("parse leaf with comma")
+
+    var number = parseALittle.detectExpression(segments)
+    expect(number.kind).to.equal("leaf expression")
+    done.ish("detect leaf with comma")
+
+    segments = parseALittle(",")
+    var comma = parseALittle.detectExpression(segments)
+    expect(comma.kind).to.equal("container break")
+    expect(comma.kindToClose).to.equal("array item")
+    done.ish("detect comma container break")
+
+    done()
+  })
 
 
 runTest(
