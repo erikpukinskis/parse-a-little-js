@@ -1,5 +1,6 @@
 var runTest = require("run-test")(require)
 
+
 // add a test for assigning a function to a variable (I think assignment right now only works for identifiers?)
 
 // add a test for assigning a function call as a key value (this might already work?)
@@ -288,6 +289,18 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "function( gets treated as a function literal, not a call",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("function(this, that, theOther) {")
+    expect(segments.intros).to.deep.equal(["function"])
+    expect(segments.separators).to.deep.equal(["("])
+    expect(segments.secondHalf).to.equal("this, that, theOther")
+    expect(segments.remainder).to.be.undefined
+    done()
+  }) 
 
 runTest(
   "method call parses",

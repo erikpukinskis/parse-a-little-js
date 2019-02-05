@@ -45,7 +45,7 @@ module.exports = library.export(
       if (emptyMatch) {
         return
       }
-      
+
       // if (middle.match(/[^\u200b]/)) {
       //   middle = middle.replace(ZERO_WIDTH_SPACE, "")
       // }
@@ -60,7 +60,8 @@ module.exports = library.export(
           remainder: source.slice(1)||undefined}}
 
       // For description of [\,\)\[\]\{\} ]* search "all possible outro symbols"
-      var functionLiteralMatch = source.match(/^(\"?)function (\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
+
+      var functionLiteralMatch = source.match(/^(\"?)function ?(\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
 
       if (expressionsOnly && functionLiteralMatch) {
         throw new Error("Need separate match for functions without a name, so we use the variableName or the key as the firstHalf")
