@@ -31,6 +31,28 @@ module.exports = library.export(
           outro: source[0],
           remainder: source.slice(1)}}
 
+      var functionLiteralMatch = source.match(/^(\"?)function (\"?)([\,\)\[\]\{\} ]*)$/)
+
+      if (functionLiteralMatch) {
+        var intros = [FUNCTION]
+        if (functionLiteralMatch[1]) {
+          intros.unshift(QUOTE)
+        }
+        if (functionLiteralMatch[3]) {
+          var outros = splitOutro(functionLiteralMatch[3])
+        }
+        if (functionLiteralMatch[2]) {
+          if (!outros) {
+            var outros = []
+          }
+          outros.unshift(QUOTE)
+        }
+        return {
+          intros: intros,
+          outros: outros,
+        }
+      }
+
       var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) ?= ?(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
 
       if (declarationAssignmentMatch) {

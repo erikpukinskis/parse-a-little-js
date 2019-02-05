@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-// runTest.only("can parse call args on same line")
+// runTest.only("function literal symbol parses")
 
 runTest(
   "opening an array",
