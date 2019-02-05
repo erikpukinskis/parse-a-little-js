@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-// runTest.only("function literal opening")
+// runTest.only("variable assignment parses")
 
 runTest(
   "opening an array",
@@ -65,7 +65,7 @@ runTest(
 )
 
 runTest(
-  "variable assignment parses",
+  "variable declaration parses",
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("\"var foo = bar\"")
@@ -77,6 +77,31 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "variable assignment parses",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("foo = bar")
+    expect(segments.firstHalf).to.equal("foo")
+    done.ish("parse out variable assignment name")
+    expect(segments.separators).to.deep.equal(["="])
+    
+    done()
+  })
+
+runTest(
+  "variable assignment works with quotes",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("\"foo = bar\"")
+    expect(segments.firstHalf).to.equal("foo")
+    expect(segments.intros).to.deep.equal(["\""])
+    expect(segments.outros).to.deep.equal(["\""])
+    expect(segments.separators).to.deep.equal(["="])
+
+    done()
+  })
 
 runTest(
   "can parse call args on same line",
@@ -175,16 +200,16 @@ runTest(
 //   }
 // )
 
-runTest(
-  "no functions named function",
-  ["./"],
-  function(expect, done, parseALittle) {
-    var segments = parseALittle("function(){")
-    expect(segments.intro).to.equal("function")
-    expect(segments.identifierIsh).to.be.undefined
-    done()
-  }
-)
+// runTest(
+//   "no functions named function",
+//   ["./"],
+//   function(expect, done, parseALittle) {
+//     var segments = parseALittle("function(){")
+//     expect(segments.intros).to.deep.equal(["function"])
+//     expect(segments.identifierIsh).to.be.undefined
+//     done()
+//   }
+// )
 
 
 
@@ -277,56 +302,4 @@ runTest(
 //   }
 // )
 
-runTest(
-  "when detectExpression fails, we can get a closer",
-  ["./"],
-  function(expect, done, parseALittle) {
-    var source = "doSomething(withThis)"
-    var segments = parseALittle(source)
-
-    var call = parseALittle.detectExpression(segments)
-
-    expect(call.remainder).to.equal("withThis)")
-
-    var reference = parseALittle.detectExpression(parseALittle(call.remainder))
-
-    expect(reference.remainder).to.equal(")")
-
-    var closer = parseALittle(reference.remainder)
-
-    expect(parseALittle.detectExpression(closer)).to.be.undefined
-
-    expect(parseALittle.detectCloser(closer)).to.equal("function call")
-
-    done()
-  }
-)
-
-runTest(
-  "detect function literal closers",
-  ["./"],
-  function(expect, done, parseALittle) {
-    expect(parseALittle.detectCloser({outro: "}"})).to.equal("function literal")
-    done()
-  }
-)
-
-runTest(
-  "detect array literal closers",
-  ["./"],
-  function(expect, done, parseALittle) {
-    expect(parseALittle.detectCloser({ outro: "]"})).to.equal("array literal")
-    done()
-  }
-)
-
-
-runTest(
-  "detect argument closers",
-  ["./"],
-  function(expect, done, parseALittle) {
-    expect(parseALittle.detectCloser({outro: ","})).to.equal("argument")
-    done()
-  }
-)
 

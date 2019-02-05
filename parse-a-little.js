@@ -2,9 +2,17 @@ var library = require("module-library")(require)
 
 module.exports = library.export(
   "parse-a-little-js",
-  function() {
+  ["./detect-expression"],
+  function(detectExpression) {
 
     var ZERO_WIDTH_SPACE = "\u200b"
+
+
+    // Some things worth noting:
+
+    // This parser doesn't really try to differentiate between right hand sides, in terms of whether it's a string or a reference. foo = "bar" and foo = bar are basically the same, they will both get spit out as a leaf expression with "bar" as the value. We're expecting to decide which of those things are references based on a semantic test (i.e. whether there is a function or a variable with that name in scope)
+
+    // We DO decide whether we're looking at a function call, function name, variable assignments, etc, purely based on syntax. So bi bim bap( will be a string, but bi.bim.bap( will be recognized as a method call, regardless of semantics. And derp = foo will be recognized as an assignment, whereas dee dum = foo will not.
 
 
     // There are two major functions in here:
@@ -56,7 +64,6 @@ module.exports = library.export(
 
           var argumentMatch = argumentSignature.match(/\(([^\)]*)(\)?)$/)
           
-          debugger
           if (argumentMatch[2]) {
             var outros = [CLOSE_PAREN]
           }
@@ -96,7 +103,7 @@ module.exports = library.export(
           var intros = [QUOTE]
         }
         intros.push(VAR)
-        debugger
+
         var firstHalf = declarationAssignmentMatch[2]
         var secondHalf = declarationAssignmentMatch[4]
         var separators = [EQUALS]
@@ -118,9 +125,35 @@ module.exports = library.export(
         }
       }
 
-      var functionCallMatch = source.match(/^(\"?)([\w]+[\w.]*)\((\"?)(.*)$/)
+      var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?(.*)(\"?)([\}\) ]*)$/)
 
-      debugger
+      if (assignmentMatch) {
+        if (assignmentMatch[1]) {
+          var intros = [QUOTE]
+        }
+        var firstHalf = assignmentMatch[2]
+        var separators = [EQUALS]
+        var secondHalf = assignmentMatch[2]
+        if (assignmentMatch[4]) {
+          var outros = splitOutro(assignmentMatch[4])
+        }
+        if (assignmentMatch[3]) {
+          if (!outros) {
+            var outros = []
+          }
+          outros.unshift(QUOTE)
+        }
+
+        return {
+          intros: intros,
+          firstHalf: firstHalf,
+          separators: separators,
+          secondHalf: secondHalf,
+          outros: outros,
+        }
+      }
+
+      var functionCallMatch = source.match(/^(\"?)([\w]+[\w.]*)\((\"?)(.*)$/)
 
       if (functionCallMatch) {
         if (functionCallMatch[1] && functionCallMatch[3]) {
@@ -199,64 +232,6 @@ module.exports = library.export(
     var CLOSE_PAREN = ")"
     var EQUALS = "="
     var COLON = ":"
-
-    function detectExpression(segments) {
-
-      var expression = {
-        remainder: segments.remainder
-      }
-
-      var outro = segments.outro && segments.outro.split("") || []
-
-      if (segments.introType == "function") {
-        var isFunctionLiteral = true
-      } else if (segments.outro && !!segments.outro.match(/^\([^{]*$/)) {
-        var isFunctionCall = true
-      } else if (segments.identifierIsh || segments.notIdentifier) {
-        var isLeafExpression = true
-      } else {
-        return
-      }
-
-      if (isFunctionLiteral) {
-        expression.kind = "function literal"
-        expression.functionName = segments.identifierIsh
-
-        if (segments.argumentSignature) {
-          expression.argumentNames = segments.argumentSignature.split(/\s*,\s*/)
-        }
-
-      } else if (isFunctionCall) {
-        expression.kind = "function call"
-
-        if (segments.separator) {
-          expression.functionName = segments.notIdentifier
-          expression.leftHandSide = segments.identifierIsh
-
-        } else {
-          expression.functionName = segments.identifierIsh
-        }
-
-      } else if (isLeafExpression) {
-        expression.kind = "leaf expression"
-        if (segments.separator == "=") {
-          expression.leftHandSide = segments.identifierIsh
-          expression.string = segments.notIdentifier
-          expression.isDeclaration = segments.intro == "var"
-        } else {
-          expression.string = segments.middle
-        }
-
-        if (outro[0] == "\"") {
-          outro = outro.slice(1)
-        }
-
-        expression.remainder = outro.join("")+(segments.remainder||"")
-      }
-
-
-      return expression
-    }
 
     parseALittle.detectExpression = detectExpression
     
