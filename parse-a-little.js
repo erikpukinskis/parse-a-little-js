@@ -6,7 +6,13 @@ module.exports = library.export(
   function(detectExpression) {
 
     var ZERO_WIDTH_SPACE = "\u200b"
-
+    var QUOTE = "\""
+    var VAR = "var"
+    var FUNCTION = "function"
+    var OPEN_PAREN = "("
+    var CLOSE_PAREN = ")"
+    var EQUALS = "="
+    var COLON = ":"
 
     // Some things worth noting:
 
@@ -282,14 +288,6 @@ module.exports = library.export(
 
       throw new Error("Invalid EZJS: "+source)
     }
-
-    var QUOTE = "\""
-    var VAR = "var"
-    var FUNCTION = "function"
-    var OPEN_PAREN = "("
-    var CLOSE_PAREN = ")"
-    var EQUALS = "="
-    var COLON = ":"
 
     parseALittle.detectExpression = detectExpression
     
