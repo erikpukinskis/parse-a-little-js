@@ -37,7 +37,7 @@ module.exports = library.export(
       if (containerBreakMatch) {
         return {
           outros: [source[0]],
-          remainder: source.slice(1)}}
+          remainder: source.slice(1)||undefined}}
 
       // For description of [\,\)\[\]\{\} ]* search "all possible outro symbols"
       var functionLiteralMatch = source.match(/^(\"?)function (\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
@@ -253,7 +253,7 @@ module.exports = library.export(
         }
       }
 
-      var stringMatch = source.match(/^(\"?) *([^"]+) *([\"\,\(\)\[\]\{\} ]*)$/)
+      var stringMatch = source.match(/^(\"?) *([^"\]]+) *([\"\,\(\)\[\]\{\} ]*)$/)
 
       if (stringMatch) {
         if (stringMatch[1]) {

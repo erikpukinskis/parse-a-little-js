@@ -4,8 +4,8 @@ var runTest = require("run-test")(require)
 
 // add a test for assigning a function call as a key value
 
-runTest.only(
-  "object literals")
+// runTest.only(
+//   "opening an array")
 
 runTest(
   "object literals",
@@ -21,7 +21,8 @@ runTest(
     done.ish("parse object literal opener")
 
     var open = parseALittle.detectExpression(segments)
-    expect(open.kind).to.equal("object open")
+    expect(open.kind).to.equal("container break")
+    expect(open.kindToOpen).to.equal("object literal")
     done.ish("detect object literal open")
 
     expect(open.remainder).to.equal("hi there: brad,")
@@ -51,14 +52,44 @@ runTest(
   "opening an array",
   ["./"],
   function(expect, done, parseALittle) {
-
     var segments = parseALittle("[books are fun]")
 
-    expect(segments.outro).to.equal("[")
+    expect(segments.outros).to.deep.equal(["["])
+    done.ish("peel off [ for opening an array")
     expect(segments.remainder).to.equal("books are fun]")
+
+    var open = parseALittle.detectExpression(segments)
+
+    expect(open.kind).to.equal("container break")
+    done.ish("detect container break")
+    expect(open.kindToOpen).to.equal("array literal")
+    done.ish("detect kind that's opened by a container break")
+    expect(open.kindToClose).to.be.undefined
+    expect(open.remainder).to.equal("books are fun]")
+
+    segments = parseALittle("books are fun]")
+    var leaf = parseALittle.detectExpression(segments)
+
+    expect(leaf.kind).to.equal("leaf expression")
+    done.ish("detect leaf expression inside array")
+    expect(leaf.string).to.equal("books are fun")
+    done.ish("leaf inside array has string")
+    expect(leaf.remainder).to.equal("]")
+
+    segments = parseALittle(
+        "]")
+    var close = parseALittle.detectExpression(segments)
+
+    expect(close.kind).to.equal("container break")
+    done.ish("detect array close container break")
+    expect(close.kindToClose).to.equal("array literal")
 
     done()
   })
+
+
+// add a test function call that takes an array of items
+
 
 runTest(
   "leading whitespace",
@@ -339,7 +370,6 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("boo.blob(\"bar\")")
-    debugger
     var call = parseALittle.detectExpression(segments)
     expect(call.kind).to.equal("function call")
     done.ish("function call gets right kind")
