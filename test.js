@@ -269,7 +269,7 @@ runTest(
 
 
 runTest(
-  "detectExpression can detect an expression",
+  "detect a function literal",
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("function(){\n  }")

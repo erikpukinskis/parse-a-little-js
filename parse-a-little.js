@@ -100,9 +100,10 @@ module.exports = library.export(
 
       if (declarationAssignmentMatch) {
         if (declarationAssignmentMatch[1]) {
-          var intros = [QUOTE]
+          var intros = [QUOTE, VAR]
+        } else {
+          var intros = [VAR]
         }
-        intros.push(VAR)
 
         var firstHalf = declarationAssignmentMatch[2]
         var secondHalf = declarationAssignmentMatch[4]
