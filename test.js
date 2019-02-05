@@ -4,6 +4,9 @@ var runTest = require("run-test")(require)
 
 // add a test for assigning a function call as a key value
 
+runTest.only(
+  "object literals")
+
 runTest(
   "object literals",
   ["./"],
