@@ -30,7 +30,7 @@ module.exports = library.export(
     function parseAllAtOnce(source) {
       source = source.trim().replace(/\s+/g, " ")
 
-      console.log("matching "+source)
+      // console.log("matching "+source)
 
       var containerBreakMatch = source.match(/^[\[\]\{\}]/)
 
@@ -127,7 +127,6 @@ module.exports = library.export(
       }
 
       var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?([^"})]*)(\"?)([\}\) ]*)$/)
-      debugger
 
       if (assignmentMatch) {
         if (assignmentMatch[1]) {
