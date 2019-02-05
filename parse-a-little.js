@@ -18,7 +18,7 @@ module.exports = library.export(
     function splitOutro(outro) {
       return outro.replace(" ", "").split("")      
     }
-    
+
     function parseAllAtOnce(source) {
       source = source.trim().replace(/\s+/g, " ")
 
@@ -60,6 +60,41 @@ module.exports = library.export(
         }
       }
 
+      var functionCallMatch = source.match(/^(\"?)(\w+)\((\"?)(.*)$/)
+
+      debugger
+
+      if (functionCallMatch) {
+        if (functionCallMatch[1] && functionCallMatch[3]) {
+          var intros = [QUOTE]
+          var outros = [OPEN_PAREN, QUOTE]
+          var remainder = functionCallMatch[4] || undefined
+
+        } else {
+          var outros = [OPEN_PAREN]
+          if (functionCallMatch[1]) {
+            var intros = [QUOTE]
+          }
+
+          if (functionCallMatch[3]) {
+            var remainder = functionCallMatch[3]+ functionCallMatch[4]
+
+          } else {
+            var remainder = functionCallMatch[4]
+          }
+        }
+
+        var functionName = functionCallMatch[2]
+
+        debugger
+
+        return {
+          intros: intros,
+          secondHalf: functionName,
+          outros: outros,
+          remainder: remainder || undefined,
+        }
+      }
       // maybe quote, maybe space, identifier, maybe space, outro symbols and spaces, everything else
       var identifierMatch = source.match(/^(\"?)(\w+) ?([\"\,\(\)\[\]\{\} ]*)$/)
 
@@ -127,6 +162,7 @@ module.exports = library.export(
     var QUOTE = "\""
     var VAR = "var"
     var FUNCTION = "function"
+    var OPEN_PAREN = "("
 
     function grabIntros(string, startingAt) {
       var hasQuote = string[startingAt] == "\""
