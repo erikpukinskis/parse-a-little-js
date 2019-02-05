@@ -82,7 +82,7 @@ module.exports = library.export(
         }
       }
 
-      var functionCallMatch = source.match(/^(\"?)(\w+)\((\"?)(.*)$/)
+      var functionCallMatch = source.match(/^(\"?)([\w]+[\w.]*)\((\"?)(.*)$/)
 
       debugger
 
