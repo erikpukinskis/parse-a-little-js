@@ -1,7 +1,7 @@
 var runTest = require("run-test")(require)
 
 
-runTest.only("function literal opening")
+// runTest.only("function literal opening")
 
 runTest(
   "opening an array",
