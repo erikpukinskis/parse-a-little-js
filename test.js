@@ -1,6 +1,7 @@
 var runTest = require("run-test")(require)
 
 
+
 // add a test for assigning a function to a variable (I think assignment right now only works for identifiers?)
 
 // add a test for assigning a function call as a key value (this might already work?)
@@ -42,8 +43,8 @@ runTest(
       var segments = parseALittle(line)
       var expression = parseALittle.detectExpression(segments)
       // console.log(spc+"****: ", line)
-      // console.log(spc+"SEG:  ", JSON.stringify(segments))
-      // console.log(spc+"EXPR: ", JSON.stringify(expression))
+      // console.log(spc+"SEG:  ", segments ? JSON.stringify(segments) : "none")
+      console.log(spc+"EXPR: ", JSON.stringify(expression))
 
       if (expression.remainder) {
         handleLine(expression.remainder, lineNumber, _, (depth||0)+1)
@@ -323,6 +324,22 @@ runTest(
     done()
   }
 )
+
+runTest(
+  "method calls on their own line",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle(".forResponse(blah)")
+    expect(segments.secondHalf).to.equal(".forResponse")
+    expect(segments.outros).to.deep.equal(["("])
+    expect(segments.remainder).to.equal("blah)")
+
+    var methodCall = parseALittle.detectExpression(segments)
+    expect(methodCall.kind).to.equal("function call")
+    expect(methodCall.functionName).to.equal(".forResponse")
+
+    done()
+  })
 
 runTest(
   "function literal without closers parses",

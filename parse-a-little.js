@@ -187,7 +187,7 @@ module.exports = library.export(
         }
       }
 
-      var functionCallMatch = source.match(/^(\"?)([\w]+[\w.]*)\((\"?)(.*)$/)
+      var functionCallMatch = source.match(/^(\"?)([\w.]*)\((\"?)(.*)$/)
 
       if (functionCallMatch) {
         if (functionCallMatch[1] && functionCallMatch[3]) {
