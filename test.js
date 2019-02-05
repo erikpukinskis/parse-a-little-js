@@ -1,6 +1,48 @@
 var runTest = require("run-test")(require)
 
+// add a test for assigning a function to a variable
 
+// add a test for assigning a function call as a key value
+
+runTest(
+  "object literals",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("foo({hi there: brad,")
+    var call = parseALittle.detectExpression(segments)
+    expect(call.remainder).to.equal("{hi there: brad,")
+    done.ish("separate out object literal argument OK")
+
+    segments = parseALittle("{hi there: brad,")
+    expect(segments.outros).to.deep.equal(["{"])
+    done.ish("parse object literal opener")
+
+    var open = parseALittle.detectExpression(segments)
+    expect(open.kind).to.equal("object open")
+    done.ish("detect object literal open")
+
+    expect(open.remainder).to.equal("hi there: brad,")
+    done.ish("separate key/value into remainder")
+
+    segments = 
+      parseALittle("hi there: brad,")
+    expect(segments.separators).to.deep.equal([":"])
+    done.ish("recognize : as a separator")
+
+    var leaf = parseALittle.detectExpression(segments)
+
+    expect(leaf.kind).to.equal("leaf expression")
+    done.ish("recognize key value as leaf expression")
+
+    expect(leaf.key).to.equal("hi there")
+    done.ish("detect object key")
+    expect(leaf.string).to.equal("brad")
+    done.ish("detect key value")
+    expect(leaf.remainder).to.equal(",")
+    done.ish("comma after key value is remainder")
+
+    done()
+  })
 
 runTest(
   "opening an array",

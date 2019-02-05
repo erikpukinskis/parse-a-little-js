@@ -21,14 +21,14 @@ module.exports = library.export(
 
     // detectExpression(segments) -> expression, which is identifying the core next available expression, figuring out which outro symbols are part of that, pulling out any identifiers, and decorating the expression with key string, remainder, etc
 
-    var parseALittle = parseAllAtOnce
-
     function splitOutro(outro) {
       return outro.replace(" ", "").split("")      
     }
 
-    function parseAllAtOnce(source) {
+    function parseALittle(source, options) {
       source = source.trim().replace(/\s+/g, " ")
+
+      var expressionsOnly = options && options.expressionsOnly || false
 
       // console.log("matching "+source)
 
@@ -36,10 +36,15 @@ module.exports = library.export(
 
       if (containerBreakMatch) {
         return {
-          outro: source[0],
+          outros: [source[0]],
           remainder: source.slice(1)}}
 
+      // For description of [\,\)\[\]\{\} ]* search "all possible outro symbols"
       var functionLiteralMatch = source.match(/^(\"?)function (\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
+
+      if (expressionsOnly && functionLiteralMatch) {
+        throw new Error("Need separate match for functions without a name, so we use the variableName or the key as the firstHalf")
+      }
 
       if (functionLiteralMatch) {
 
@@ -96,9 +101,12 @@ module.exports = library.export(
         }
       }
 
+      // [\"\,\(\)\[\]\{\} ]* is the set of all possible outro symbols, which could follow an expression, like an array item. You need quote because the item itself could be a string. You need the comma in case it IS an item in an array or a function call argument. You need the brackets and braces because you could be opening or closing an array or object, and you need the space because style.
+
       var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) ?= ?(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
 
-      if (declarationAssignmentMatch) {
+      // we don't want any assigments going into key values or other variable assignments
+      if (declarationAssignmentMatch && !expressionsOnly) {
         if (declarationAssignmentMatch[1]) {
           var intros = [QUOTE, VAR]
         } else {
@@ -126,9 +134,13 @@ module.exports = library.export(
         }
       }
 
+      // [\}\) ]* is an alternate set of outro symbols, the ones which can follow a statement, like a variable assignment or. Statement Following Outro Symbols.
+
+
       var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?([^"})]*)(\"?)([\}\) ]*)$/)
 
-      if (assignmentMatch) {
+      // again, no assigments for key values or variable assignments right hand sides
+      if (assignmentMatch && !expressionsOnly) {
         if (assignmentMatch[1]) {
           var intros = [QUOTE]
         }
@@ -185,6 +197,47 @@ module.exports = library.export(
           remainder: remainder || undefined,
         }
       }
+
+
+      // key value
+
+      // This uses all possible outro symbols, because the values could be any kind of expression
+      var keyValueMatch = source.match(/("?)(.*)([ "]*):([ "]*)(.*)$/)
+
+      debugger
+      if (keyValueMatch) {
+
+        var key = keyValueMatch[2]
+        var rightHandSide = keyValueMatch[5]
+        var separators = [":"]
+
+        if (keyValueMatch[1].trim() == "\"") {
+          var intros = ["\""]
+        }
+        if (keyValueMatch[3].trim() == "\"") {
+          separators.unshift("\"")
+        }
+        if (keyValueMatch[4].trim() == "\"") {
+          separators.push("\"")
+        }
+
+        debugger
+
+        var segments = parseALittle(rightHandSide, {expressionsOnly: true})
+
+        separators = separators.concat(segments.intros||[], segments.separators||[])
+
+        if (segments.firstHalf) {
+          throw new Error("got segments with a firstHalf even though we asked parseALittle for expressionsOnly")
+        }
+
+        segments.intros = intros
+        segments.firstHalf = key
+        segments.separators = separators
+
+        return segments
+      }
+
       // maybe quote, maybe space, identifier, maybe space, outro symbols and spaces, everything else
       var identifierMatch = source.match(/^(\"?)(\w+) ?([\"\,\(\)\[\]\{\} ]*)$/)
 
@@ -220,6 +273,7 @@ module.exports = library.export(
         }        
       }
 
+      debugger
       throw new Error("impl")
     }
 
