@@ -1,6 +1,6 @@
 {
   "name": "parse-a-little-js",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "Slice just enough JavaScript off a string to describe an expression or the closing of a scope",
   "main": "parse-a-little.js",
   "dependencies": {
