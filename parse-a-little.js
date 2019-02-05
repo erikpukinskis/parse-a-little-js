@@ -40,15 +40,19 @@ module.exports = library.export(
 
       // Might need to do something with zero width spaces again:
 
-      // var emptyMatch = source.match(/^[\s\u200b]*"?[\s\u200b]*$/)
+      var emptyMatch = source.match(/^[\s\u200b]*"?[\s\u200b]*$/)
 
+      if (emptyMatch) {
+        return
+      }
+      
       // if (middle.match(/[^\u200b]/)) {
       //   middle = middle.replace(ZERO_WIDTH_SPACE, "")
       // }
 
       // console.log("matching "+source)
 
-      var containerBreakMatch = source.match(/^[\[\]\{\}\,]/)
+      var containerBreakMatch = source.match(/^[\)\[\]\{\}\,]/)
 
       if (containerBreakMatch) {
         return {

@@ -1,9 +1,54 @@
 var runTest = require("run-test")(require)
 
-// add a test for assigning a function to a variable
+// add a test for assigning a function to a variable (I think assignment right now only works for identifiers?)
 
-// add a test for assigning a function call as a key value
+// add a test for assigning a function call as a key value (this might already work?)
 
+// "function(this, that, theOther) {"
+// should be a literal, not a function call
+
+// )
+// should be a container break, kindToClose = function call
+
+// ).forResponse(
+// should be a container break, kindToClose = function call
+
+
+// runTest.only(
+//   "example program works good")
+
+
+runTest(
+  "example program works good",
+  ["./", "fs"],
+  function(expect, done, parseALittle, fs) {  
+    fs.readFile(
+      "examples/stylesheet.ez.js",
+      "utf8",
+      function(error, data) {
+        var lines = data.split("\n")
+
+        lines.forEach(handleLine)
+        done()
+      })
+
+    function indent(depth) {
+      return new Array(depth||0).fill("  ").join("")
+    }
+
+    function handleLine(line, lineNumber, _, depth) {
+      var spc = indent(depth)
+      var segments = parseALittle(line)
+      var expression = parseALittle.detectExpression(segments)
+      // console.log(spc+"****: ", line)
+      // console.log(spc+"SEG:  ", JSON.stringify(segments))
+      // console.log(spc+"EXPR: ", JSON.stringify(expression))
+
+      if (expression.remainder) {
+        handleLine(expression.remainder, lineNumber, _, (depth||0)+1)
+      }
+    }
+  })
 
 runTest(
   "object literals",
@@ -116,7 +161,7 @@ runTest(
     segments = parseALittle(",")
     var comma = parseALittle.detectExpression(segments)
     expect(comma.kind).to.equal("container break")
-    expect(comma.kindToClose).to.equal("array item or key value")
+    expect(comma.kindToClose).to.equal("array item or key value or argument")
     done.ish("detect comma container break")
 
     done()
@@ -253,6 +298,14 @@ runTest(
     done.ish("can match dots in identifiers")
     expect(segments.remainder).to.be.undefined
     expect(segments.outros).to.deep.equal(["("])
+
+    segments = parseALittle(").blah")
+    expect(segments.outros).to.deep.equal([")"])
+    expect(segments.remainder).to.equal(".blah")
+
+    var callBreak = parseALittle.detectExpression(segments)
+    expect(callBreak.kind).to.equal("container break")
+    expect(callBreak.kindToClose).to.equal("function call")
 
     done()
   }

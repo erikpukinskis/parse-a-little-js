@@ -4,7 +4,7 @@ module.exports = library.export(
   "parse-a-little-js/detectExpression",
   function() {
 
-    var CONTAINER_BREAKS = ["[", "]", "{", "}", ","]
+    var CONTAINER_BREAKS = [")", "[", "]", "{", "}", ","]
 
     function joinRemainder(outros, remainder) {
       if (outros) {
@@ -23,7 +23,15 @@ module.exports = library.export(
 
     function detectExpression(segments) {
 
-      var isDeclaration = contains(segments.intros, "var")
+      if (!segments) {
+        return {
+          kind: "empty expression"
+        }
+      }
+      
+      if (contains(segments.intros, "var")) {
+        var isDeclaration = true
+      }
       var separators = segments.separators
 
 
@@ -81,7 +89,9 @@ module.exports = library.export(
         } else if (symbol == "}") {
           expression.kindToOpen = "object or function literal"
         } else if (symbol == ",") {
-          expression.kindToClose = "array item or key value"
+          expression.kindToClose = "array item or key value or argument"
+        } else if (symbol == ")") {
+          expression.kindToClose = "function call"
         }
 
         return expression
