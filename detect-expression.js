@@ -28,7 +28,7 @@ module.exports = library.export(
           kind: "empty expression"
         }
       }
-      
+
       if (contains(segments.intros, "var")) {
         var isDeclaration = true
       }
@@ -87,7 +87,7 @@ module.exports = library.export(
         } else if (symbol == "{") {
           expression.kindToOpen = "object literal"
         } else if (symbol == "}") {
-          expression.kindToOpen = "object or function literal"
+          expression.kindToClose = "object literal or function literal"
         } else if (symbol == ",") {
           expression.kindToClose = "array item or key value or argument"
         } else if (symbol == ")") {

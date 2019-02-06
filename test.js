@@ -6,33 +6,17 @@ var runTest = require("run-test")(require)
 
 // add a test for assigning a function call as a key value (this might already work?)
 
-// "function(this, that, theOther) {"
-// should be a literal, not a function call
 
-// )
-// should be a container break, kindToClose = function call
-
-// ).forResponse(
-// should be a container break, kindToClose = function call
-
-
-// runTest.only(
-//   "example program works good")
-
-
-runTest(
-  "example program works good",
-  ["./", "fs"],
-  function(expect, done, parseALittle, fs) {  
-    fs.readFile(
-      "examples/stylesheet.ez.js",
-      "utf8",
-      function(error, data) {
-        var lines = data.split("\n")
-
-        lines.forEach(handleLine)
-        done()
-      })
+runTest.library.define(
+  "handle-line",
+  ["./"],
+  function(parseALittle) {
+    var mute = false
+    var stack
+    handleLine.reset = function(newMute) {
+      mute = newMute
+      stack = []
+    }
 
     function indent(depth) {
       return new Array(depth||0).fill("  ").join("")
@@ -42,14 +26,94 @@ runTest(
       var spc = indent(depth)
       var segments = parseALittle(line)
       var expression = parseALittle.detectExpression(segments)
-      // console.log(spc+"****: ", line)
-      // console.log(spc+"SEG:  ", segments ? JSON.stringify(segments) : "none")
-      console.log(spc+"EXPR: ", JSON.stringify(expression))
+
+      function log() {
+        if (!mute) {
+          console.log.apply(console, arguments)
+        }
+      }
+
+      log("\n______________________\n"+line.trim(), "\n----------------------\n")
+      if (expression.kind != "container break") {
+        log(spc+"EXPR: ", JSON.stringify(expression))
+      }
+      // log(spc+"SEG:  ", segments ? JSON.stringify(segments) : "none")
+
+      var kindThatIsOpen = stack[stack.length-1]
+
+      if (expression.kind == "function call") {
+        stack.push("function call")
+        log(" ( ! ) pushed function call")
+      } else if (expression.kind == "function literal") {
+        stack.push("function literal")
+        log(" ( ! ) pushed function literal")
+      } else if (expression.kind == "container break") {
+        if (expression.kindToOpen == "array literal") {
+          stack.push("array literal")
+          log(" ( ! ) pushed array literal")
+        } else if (expression.kindToOpen == "object literal") {
+          stack.push("object literal")
+          log(" ( ! ) pushed object literal")
+        } else if (expression.kindToClose == "array item or key value or argument") {
+
+          if (kindThatIsOpen == "function call") {
+            var item = "function call argument"
+          } else if (kindThatIsOpen == "array literal") {
+            var item = "array item"
+          } else if (kindThatIsOpen == "object literal") {
+            var item = "key value"
+          }
+
+          log(" ( ! ) next "+item)
+        } else {
+          if (!expression.kindToClose) {
+            debugger
+          }
+          if (expression.kindToClose.match(kindThatIsOpen)) {
+            stack.pop()
+            log(" ( ! ) popped "+kindThatIsOpen)
+          } else {
+            throw new Error("expected to be closing "+expression.kindToClose+" but top of stack is "+kindThatIsOpen)
+          }
+        }
+      }
 
       if (expression.remainder) {
         handleLine(expression.remainder, lineNumber, _, (depth||0)+1)
       }
     }
+
+    return handleLine
+  })
+
+runTest(
+  "good coverage of syntax",
+  ["fs", "handle-line"],
+  function(expect, done, fs, handleLine) {  
+    fs.readFile(
+      "examples/stylesheet.ez.js",
+      "utf8",
+      function(error, data) {
+        var lines = data.split("\n")
+        handleLine.reset(true)
+        lines.forEach(handleLine)
+        done()
+      })
+  })
+
+runTest(
+  "example site works",
+  ["fs", "handle-line"],
+  function(expect, done, fs, handleLine) {  
+    fs.readFile(
+      "examples/basic-site.ez.js",
+      "utf8",
+      function(error, data) {
+        var lines = data.split("\n")
+        handleLine.reset(true)
+        lines.forEach(handleLine)
+        done()
+      })
   })
 
 runTest(
