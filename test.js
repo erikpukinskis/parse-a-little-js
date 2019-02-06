@@ -117,6 +117,16 @@ runTest(
   })
 
 runTest(
+  "empty string",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("\"\", {")
+    expect(segments.intros).to.deep.equal(["\""])
+    expect(segments.outros).to.deep.equal(["\"",",","{"])
+    done()
+  })
+
+runTest(
   "object literals",
   ["./"],
   function(expect, done, parseALittle) {

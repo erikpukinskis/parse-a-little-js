@@ -32,7 +32,7 @@ module.exports = library.export(
     }
 
     function parseALittle(source, options) {
-      source = source.trim().replace(/\s+/g, " ")
+      source = source.trim().replace(/\s/g, " ")
 
       var expressionsOnly = options && options.expressionsOnly || false
 
@@ -61,7 +61,7 @@ module.exports = library.export(
 
       // For description of [\,\)\[\]\{\} ]* search "all possible outro symbols"
 
-      var functionLiteralMatch = source.match(/^(\"?)function ?(\w*) ?(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
+      var functionLiteralMatch = source.match(/^(\"?)function *(\w*) *(\([\w, ]*\)?)?(\"?)([\,\)\[\]\{\} ]*)$/)
 
       if (expressionsOnly && functionLiteralMatch) {
         throw new Error("Need separate match for functions without a name, so we use the variableName or the key as the firstHalf")
@@ -124,7 +124,7 @@ module.exports = library.export(
 
       // [\"\,\(\)\[\]\{\} ]* is the set of all possible outro symbols, which could follow an expression, like an array item. You need quote because the item itself could be a string. You need the comma in case it IS an item in an array or a function call argument. You need the brackets and braces because you could be opening or closing an array or object, and you need the space because style.
 
-      var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) ?= ?(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
+      var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) *= *(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
 
       // we don't want any assigments going into key values or other variable assignments
       if (declarationAssignmentMatch && !expressionsOnly) {
@@ -158,7 +158,7 @@ module.exports = library.export(
       // [\}\) ]* is an alternate set of outro symbols, the ones which can follow a statement, like a variable assignment or. Statement Following Outro Symbols.
 
 
-      var assignmentMatch = source.match(/^(\"?)([\w]+) ?= ?([^"})]*)(\"?)([\}\) ]*)$/)
+      var assignmentMatch = source.match(/^(\"?)([\w]+) *= *([^"})]*)(\"?)([\}\) ]*)$/)
 
       // again, no assigments for key values or variable assignments right hand sides
       if (assignmentMatch && !expressionsOnly) {
@@ -257,7 +257,7 @@ module.exports = library.export(
       }
 
       // maybe quote, maybe space, identifier, maybe space, outro symbols and spaces, everything else
-      var identifierMatch = source.match(/^(\"?)(\w+) ?([\"\,\(\)\[\]\{\} ]*)$/)
+      var identifierMatch = source.match(/^(\"?)(\w+) *([\"\,\(\)\[\]\{\} ]*)$/)
 
       if (identifierMatch) {
         if (identifierMatch[1]) {
@@ -290,6 +290,17 @@ module.exports = library.export(
           outros: outros,
         }        
       }
+
+      var emptyStringMatch = source.match(/^\"( *)(\"[\,\(\)\[\]\{\} ]*)$/)
+
+      if (emptyStringMatch) {
+        return {
+          intros: ["\""],
+          string: emptyStringMatch[1],
+          outros: splitOutro(emptyStringMatch[2]),
+        }
+      }
+
 
       throw new Error("Invalid EZJS: "+source)
     }
