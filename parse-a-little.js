@@ -36,6 +36,23 @@ module.exports = library.export(
 
       var expressionsOnly = options && options.expressionsOnly || false
 
+      var instantiationMatch = source.match(/^\s*new (\w+)\((.*)$/)
+
+      if (instantiationMatch) {
+        return {
+          intros: ["new"],
+          "secondHalf": instantiationMatch[1],
+          "remainder": instantiationMatch[2] || undefined
+        }
+      }
+
+      if (commentMatch) {
+        return {
+          intros: ["//"],
+          secondHalf: commentMatch[1]
+        }
+      }
+
 
       var commentMatch = source.match(/^\s*\/\/(.*)$/)
 
@@ -132,7 +149,7 @@ module.exports = library.export(
 
       // [\"\,\(\)\[\]\{\} ]* is the set of all possible outro symbols, which could follow an expression, like an array item. You need quote because the item itself could be a string. You need the comma in case it IS an item in an array or a function call argument. You need the brackets and braces because you could be opening or closing an array or object, and you need the space because style.
 
-      var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) *= *(\"?)(\w+)([\"\,\(\)\[\]\{\} ]*)$/)
+      var declarationAssignmentMatch = source.match(/^(\"?)var (\w+) *= *(.*)$/)
 
       // we don't want any assigments going into key values or other variable assignments
       if (declarationAssignmentMatch && !expressionsOnly) {
@@ -143,23 +160,28 @@ module.exports = library.export(
         }
 
         var firstHalf = declarationAssignmentMatch[2]
-        var secondHalf = declarationAssignmentMatch[4]
-        var separators = [EQUALS]
 
-        if (declarationAssignmentMatch[3]) {
-          separators.push(QUOTE)
-        }
+        var remainder = declarationAssignmentMatch[3]
 
-        if (declarationAssignmentMatch[5]) {
-          var outros = splitOutro(declarationAssignmentMatch[5])
-        }
+        if (remainder) {
+          var rightHandSegments = parseALittle(remainder)
 
-        return {
-          intros: intros,
-          firstHalf: firstHalf,
-          separators: separators,
-          secondHalf: secondHalf,
-          outros: outros,
+          var separators = [EQUALS].concat(rightHandSegments.intros||[], rightHandSegments.separators||[])
+
+          return {
+            intros: intros,
+            firstHalf: firstHalf,
+            separators: separators,
+            secondHalf: rightHandSegments.secondHalf,
+            outros: rightHandSegments.outros
+          }
+
+        } else {
+          return {
+            intros: intros,
+            firstHalf: firstHalf,
+            separators: [EQUALS],
+          }
         }
       }
 
