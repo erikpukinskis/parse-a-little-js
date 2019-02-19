@@ -39,9 +39,11 @@ module.exports = library.export(
       var instantiationMatch = source.match(/^\s*new (\w+)\((.*)$/)
 
       if (instantiationMatch) {
+        if (instantiationMatch)
         return {
           intros: ["new"],
           "secondHalf": instantiationMatch[1],
+          "outros": ["("],
           "remainder": instantiationMatch[2] || undefined
         }
       }
