@@ -37,6 +37,14 @@ module.exports = library.export(
       var expressionsOnly = options && options.expressionsOnly || false
 
 
+      var commentMatch = source.match(/^\s*\/\/(.*)$/)
+
+      if (commentMatch) {
+        return {
+          intros: ["//"],
+          secondHalf: commentMatch[1]
+        }
+      }
 
       // Might need to do something with zero width spaces again:
 
