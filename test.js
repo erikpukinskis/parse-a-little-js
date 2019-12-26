@@ -207,6 +207,30 @@ runTest(
     done()
   })
 
+runTest(
+  "assigning an array",
+  ["./"],
+  function(expect, done, parseALittle) {
+    var segments = parseALittle("var things = [")
+    expect(segments).to.have.deep.property("intros", ["var"])
+    done.ish("knows this is an assignment")
+    expect(segments).to.have.property("firstHalf", "things")
+    expect(segments).to.have.deep.property("separators",["="])
+    done.ish("collects variable name")
+
+    var expr = parseALittle.detectExpression(segments)
+
+    expect(expr).to.have.property("kindToOpen", "array literal")
+    done.ish("detect container type")
+    expect(expr).to.have.property("kind", "container break")
+
+    expect(expr).to.have.property("leftHandSide", "things")
+    done.ish("collect left hand side on expression")
+    expect(expr).to.have.property("isDeclaration", true)
+    done.ish("recognize declaration")
+
+    done()    
+  })
 
 runTest(
   "array in function call args",
@@ -259,13 +283,13 @@ runTest(
   ["./"],
   function(expect, done, parseALittle) {
     var segments = parseALittle("\"laugh\",[")
-    expect(segments.secondHalf).to.equal("laugh")
+    expect(segments).to.have.property("secondHalf", "laugh")
     done.ish("parse out string second half")
-    expect(segments.intros).to.deep.equal(["\""])
+    expect(segments).to.have.deep.property("intros", ["\""])
     done.ish("parse out quote intro")
-    expect(segments.outros).to.deep.equal(["\"", ",", "["])
+    expect(segments).to.have.deep.property("outros", ["\"", ",", "["])
     done.ish("array opener goes in outros")
-    expect(segments.remainder).to.be.undefined
+    expect(segments).not.to.have.property("remainder")
     done()
   }
 )

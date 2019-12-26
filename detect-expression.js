@@ -68,39 +68,10 @@ module.exports = library.export(
         return expression
       }
 
-
-      // container break
-
-      if (segments.outros && !segments.secondHalf && segments.outros.length == 1 && contains(CONTAINER_BREAKS, segments.outros[0])) {
-
-        var symbol = segments.outros[0]
-
-        var expression = {
-          kind: "container break",
-          remainder: segments.remainder,
-        }
-
-        if (symbol == "[") {
-          expression.kindToOpen = "array literal"
-        } else if (symbol ==  "]") {
-          expression.kindToClose = "array literal"
-        } else if (symbol == "{") {
-          expression.kindToOpen = "object literal"
-        } else if (symbol == "}") {
-          expression.kindToClose = "object literal or function literal"
-        } else if (symbol == ",") {
-          expression.kindToClose = "array item or key value or argument"
-        } else if (symbol == ")") {
-          expression.kindToClose = "function call"
-        }
-
-        return expression
-      }
-
-
-      // function literal
-
       if (contains(segments.intros, "function")) {
+
+        // function literal
+
         var outros = clone(segments.outros)
         if (outros && outros[0] == ")") {
           outros.shift()
@@ -122,10 +93,36 @@ module.exports = library.export(
         }
       }
 
+      // Function calls, container breaks, and leaf expressions can all have left hand sides, so we generate an expression for each of those kinds and then add the variable assignment info on at at the end:
 
-      // function call
+      if (segments.outros && !segments.secondHalf && segments.outros.length == 1 && contains(CONTAINER_BREAKS, segments.outros[0])) {
 
-      if (segments.outros && segments.outros[0] == "(") {
+        // container break
+
+        var symbol = segments.outros[0]
+
+        var expression = {
+          kind: "container break",
+        }
+        var remainder = segments.remainder
+
+        if (symbol == "[") {
+          expression.kindToOpen = "array literal"
+        } else if (symbol ==  "]") {
+          expression.kindToClose = "array literal"
+        } else if (symbol == "{") {
+          expression.kindToOpen = "object literal"
+        } else if (symbol == "}") {
+          expression.kindToClose = "object literal or function literal"
+        } else if (symbol == ",") {
+          expression.kindToClose = "array item or key value or argument"
+        } else if (symbol == ")") {
+          expression.kindToClose = "function call"
+        }
+
+      } else if (segments.outros && segments.outros[0] == "(") {
+
+        // function call
 
         outros = clone(segments.outros)
         outros.shift()
@@ -136,33 +133,35 @@ module.exports = library.export(
 
         var remainder = joinRemainder(outros, segments.remainder)
 
-        return {
+        var expression = {
           kind: "function call",
           functionName: segments.secondHalf,
-          leftHandSide: segments.firstHalf,
-          isDeclaration: isDeclaration,
-          remainder: remainder,
+        }
+
+      } else {
+
+        // leaf expression
+
+        var outros = clone(segments.outros)
+
+        if (outros && outros[0] == "\"") {
+          outros.shift()
+        }
+        var remainder = joinRemainder(outros, segments.remainder)
+
+
+        var expression = {
+          kind: "leaf expression",
+          string: segments.secondHalf,
         }
       }
 
 
-      // leaf expression
+      expression.leftHandSide = segments.firstHalf
+      expression.isDeclaration = isDeclaration
+      expression.remainder = remainder
 
-      var outros = clone(segments.outros)
-
-      if (outros && outros[0] == "\"") {
-        outros.shift()
-      }
-      var remainder = joinRemainder(outros, segments.remainder)
-
-
-      return {
-        kind: "leaf expression",
-        leftHandSide: segments.firstHalf,
-        string: segments.secondHalf,
-        isDeclaration: isDeclaration,
-        remainder: remainder,
-      }
+      return expression
     }
 
     function contains(array, value) {
